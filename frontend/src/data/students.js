@@ -5,4 +5,5 @@ export const DEMO_STUDENTS = [
   { id: 'STU004', name: 'Kartik', rollNumber: '2GI25EC056' },
 ];
 
-export const GEOFENCE_RADIUS_METERS = 100;
+export const GEOFENCE_RADIUS_METERS = 20;
+export const MONITORING_DURATION_MS = 120000;

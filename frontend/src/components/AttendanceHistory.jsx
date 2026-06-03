@@ -70,7 +70,8 @@ export default function AttendanceHistory({ studentId }) {
                 <th>Time</th>
                 <th>Session</th>
                 <th>Status</th>
-                <th>Distance</th>
+                <th>Distance (Origin)</th>
+                <th>Monitoring</th>
               </tr>
             </thead>
             <tbody>
@@ -90,7 +91,16 @@ export default function AttendanceHistory({ studentId }) {
                         {record.status}
                       </span>
                     </td>
-                    <td>{Math.round(record.distance)}m</td>
+                    <td>{Math.round(record.currentDistance ?? record.distance)}m</td>
+                    <td>
+                      <span className={`badge ${
+                        record.monitoringStatus === 'Monitoring' ? 'badge-warning' :
+                        record.monitoringStatus === 'Completed' ? 'badge-expired' :
+                        record.monitoringStatus === 'Location Error' ? 'badge-error' : ''
+                      }`}>
+                        {record.monitoringStatus || '—'}
+                      </span>
+                    </td>
                   </tr>
                 );
               })}

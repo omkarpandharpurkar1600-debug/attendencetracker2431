@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DEMO_STUDENTS, GEOFENCE_RADIUS_METERS } from '../data/students';
+import { DEMO_STUDENTS, GEOFENCE_RADIUS_METERS, MONITORING_DURATION_MS } from '../data/students';
 import * as storage from '../utils/storage';
 import { calculateDistance } from '../utils/geo';
 
@@ -117,8 +117,11 @@ export function AppProvider({ children }) {
       sessionName: session.name,
       scanTime: new Date().toISOString(),
       status,
-      location: studentLocation,
-      distance,
+      monitoringStatus: 'Monitoring',
+      monitoringEndTime: Date.now() + MONITORING_DURATION_MS,
+      originLat: studentLocation.lat,
+      originLng: studentLocation.lng,
+      currentDistance: distance,
     };
 
     storage.addAttendance(record);

@@ -7,72 +7,109 @@ import { useApp } from '../context/AppContext';
 
 export default function LocationTracker({
   sessionId,
-  sessionLat,
-  sessionLng,
+  originLat,
+  originLng,
+  monitoringEndTime,
   attendanceId,
   onStatusChange,
+  onComplete,
 }) {
   const { currentUser, updateAttendanceStatus } = useApp();
   const lastStatusRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    const cleanup = watchPosition((position) => {
-      const distance = calculateDistance(
-        position.lat,
-        position.lng,
-        sessionLat,
-        sessionLng
-      );
+    // Also use a standard interval to check for timeout even if position doesn't change
+    intervalRef.current = setInterval(() => {
+      if (Date.now() > monitoringEndTime) {
+        updateAttendanceStatus(attendanceId, { monitoringStatus: 'Completed' });
+        toast.success('Monitoring period completed.');
+        if (onComplete) onComplete();
+      }
+    }, 1000);
 
-      const newStatus = distance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
-
-      // Log location to storage
-      storage.addLocationLog({
-        studentId: currentUser.id,
-        sessionId,
-        attendanceId,
-        lat: position.lat,
-        lng: position.lng,
-        distance,
-        status: newStatus,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Update attendance status if changed
-      if (lastStatusRef.current !== null && lastStatusRef.current !== newStatus) {
-        updateAttendanceStatus(attendanceId, { status: newStatus, distance });
-
-        if (newStatus === 'Absent') {
-          toast.error(
-            `You moved outside the geofence (${Math.round(distance)}m away). Status changed to Absent.`,
-            { duration: 5000 }
-          );
-        } else {
-          toast.success(
-            `You are back within the geofence (${Math.round(distance)}m). Status changed to Present.`,
-            { duration: 5000 }
-          );
+    const cleanup = watchPosition(
+      (position) => {
+        if (Date.now() > monitoringEndTime) {
+          return; // Ignore updates after completion
         }
-      }
 
-      lastStatusRef.current = newStatus;
+        const distance = calculateDistance(
+          position.lat,
+          position.lng,
+          originLat,
+          originLng
+        );
 
-      if (onStatusChange) {
-        onStatusChange(newStatus, distance);
-      }
-    }, null, 15000);
+        const newStatus = distance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
 
-    return cleanup;
+        // Log location to storage
+        storage.addLocationLog({
+          studentId: currentUser.id,
+          sessionId,
+          attendanceId,
+          lat: position.lat,
+          lng: position.lng,
+          distance,
+          status: newStatus,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Always update distance in storage so UI reflects live distance
+        updateAttendanceStatus(attendanceId, { 
+          status: newStatus, 
+          currentDistance: distance 
+        });
+
+        if (lastStatusRef.current !== null && lastStatusRef.current !== newStatus) {
+          if (newStatus === 'Absent') {
+            toast.error(
+              `You moved outside the allowed radius (${Math.round(distance)}m away). Status changed to Absent.`,
+              { duration: 5000 }
+            );
+          } else {
+            toast.success(
+              `You are back within the allowed radius (${Math.round(distance)}m). Status changed to Present.`,
+              { duration: 5000 }
+            );
+          }
+        }
+
+        lastStatusRef.current = newStatus;
+
+        if (onStatusChange) {
+          onStatusChange(newStatus, distance);
+        }
+      },
+      (error) => {
+        // Location Error
+        if (Date.now() <= monitoringEndTime) {
+          updateAttendanceStatus(attendanceId, { 
+            status: 'Absent',
+            monitoringStatus: 'Location Error' 
+          });
+          toast.error('Location tracking error. Status set to Absent.');
+          if (onComplete) onComplete();
+        }
+      },
+      15000
+    );
+
+    return () => {
+      cleanup();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [
     sessionId,
-    sessionLat,
-    sessionLng,
+    originLat,
+    originLng,
+    monitoringEndTime,
     attendanceId,
     currentUser,
     updateAttendanceStatus,
     onStatusChange,
+    onComplete,
   ]);
 
-  // Invisible component
   return null;
 }

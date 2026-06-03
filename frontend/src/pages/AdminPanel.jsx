@@ -319,7 +319,8 @@ export default function AdminPanel() {
                       <th>Date</th>
                       <th>Time</th>
                       <th>Status</th>
-                      <th>Distance</th>
+                      <th>Distance (Origin)</th>
+                      <th>Monitoring</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -335,7 +336,16 @@ export default function AdminPanel() {
                             {record.status}
                           </span>
                         </td>
-                        <td>{record.distance != null ? `${Math.round(record.distance)}m` : '—'}</td>
+                        <td>{(record.currentDistance ?? record.distance) != null ? `${Math.round(record.currentDistance ?? record.distance)}m` : '—'}</td>
+                        <td>
+                          <span className={`badge ${
+                            record.monitoringStatus === 'Monitoring' ? 'badge-warning' :
+                            record.monitoringStatus === 'Completed' ? 'badge-expired' :
+                            record.monitoringStatus === 'Location Error' ? 'badge-error' : ''
+                          }`}>
+                            {record.monitoringStatus || '—'}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
