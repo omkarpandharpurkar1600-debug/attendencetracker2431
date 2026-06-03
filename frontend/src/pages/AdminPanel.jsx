@@ -5,12 +5,15 @@ import { useApp } from '../context/AppContext';
 import { DEMO_STUDENTS } from '../data/students';
 import QRGenerator from '../components/QRGenerator';
 import LiveMonitor from '../components/LiveMonitor';
+import Reports from '../components/Reports';
 import storage from '../utils/storage';
 import { getCurrentPosition } from '../utils/geo';
 
 export default function AdminPanel() {
   const { currentUser, sessions, attendance, logout, refreshData, createSession } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showQR, setShowQR] = useState(null);
   const [sessionForm, setSessionForm] = useState({ name: '', className: '', startTime: '', endTime: '' });
@@ -106,11 +109,64 @@ export default function AdminPanel() {
       );
     });
 
+  const handleGenerateSamples = async () => {
+    setIsGenerating(true);
+    // 1. Create a dummy session
+    const res = await createSession({
+      name: 'Computer Networks - CN401',
+      className: 'CSE 4th Year',
+      duration: 60,
+    });
+    
+    if (res.success) {
+      const sessionId = res.session.id;
+      // 2. Generate random attendance for some demo students
+      DEMO_STUDENTS.forEach((student, index) => {
+        const statuses = ['Present', 'Absent'];
+        const monitoringStatuses = ['Monitoring', 'Completed', 'Suspicious', 'Location Disabled'];
+        const riskLevels = ['Low', 'Medium', 'High'];
+        
+        const isPresent = Math.random() > 0.4;
+        const status = isPresent ? 'Present' : 'Absent';
+        const riskLevel = isPresent ? 'Low' : riskLevels[Math.floor(Math.random() * riskLevels.length)];
+        
+        storage.addAttendance({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2) + index,
+          studentId: student.id,
+          studentName: student.name,
+          rollNumber: student.rollNumber,
+          sessionId,
+          sessionName: 'Computer Networks - CN401',
+          scanTime: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+          status,
+          monitoringStatus: monitoringStatuses[Math.floor(Math.random() * monitoringStatuses.length)],
+          monitoringEndTime: Date.now() + 120000,
+          originLat: 15.8497,
+          originLng: 74.4977,
+          currentDistance: isPresent ? Math.random() * 15 : 25 + Math.random() * 50,
+          deviceId: 'DEV-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+          riskLevel
+        });
+      });
+      toast.success('Sample demo data injected successfully!');
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  };
+
+  const handleResetDemo = () => {
+    storage.clearAll();
+    toast.success('All demo data cleared.');
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
   return (
     <>
-      <div className="navbar">
+      <div className="navbar no-print">
         <span className="navbar-brand">GeoSecure</span>
         <div className="navbar-right">
+          <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem' }} onClick={() => setShowDemoModal(true)}>
+            Demo Controls
+          </button>
           <span>Admin Panel</span>
           <button className="btn-icon" onClick={logout}>
             <LogOut size={18} />
@@ -135,7 +191,12 @@ export default function AdminPanel() {
           <button className={`tab ${activeTab === 'audit' ? 'active' : ''}`} onClick={() => setActiveTab('audit')}>
             Audit Logs
           </button>
+          <button className={`tab ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
+            Reports & Analytics
+          </button>
         </div>
+
+        {activeTab === 'reports' && <Reports />}
 
         {activeTab === 'live' && (
           <LiveMonitor activeSessionId={activeSessions.length > 0 ? activeSessions[0].id : null} />
@@ -421,6 +482,28 @@ export default function AdminPanel() {
           </>
         )}
       </div>
+
+      {showDemoModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-card fade-in" style={{ maxWidth: 400 }}>
+            <h3 style={{ marginTop: 0, marginBottom: 16 }}>Project Demo Controls</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 24 }}>
+              Use these tools during your final-year presentation to quickly reset state or generate mock data to showcase the analytics.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <button className="btn-primary" onClick={handleGenerateSamples} disabled={isGenerating}>
+                {isGenerating ? 'Generating...' : 'Generate Sample Data & Charts'}
+              </button>
+              <button className="btn-danger" onClick={handleResetDemo}>
+                Factory Reset (Clear All Data)
+              </button>
+              <button className="btn-secondary" onClick={() => setShowDemoModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
