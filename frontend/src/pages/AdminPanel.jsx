@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Radio, CalendarCheck, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut } from 'lucide-react';
+import { LogOut, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
 import { DEMO_STUDENTS } from '../data/students';
@@ -108,11 +108,11 @@ export default function AdminPanel() {
   return (
     <>
       <div className="navbar">
-        <span className="navbar-brand">GeoSecure</span>
+        <span className="navbar-brand">GEOSECURE.</span>
         <div className="navbar-right">
-          <span>Admin Panel</span>
-          <button className="btn-icon" onClick={logout}>
-            <LogOut size={18} />
+          <span className="text-mono text-sm tracking-wide">ADMIN PANEL</span>
+          <button className="btn-ghost" onClick={logout}>
+            LOGOUT
           </button>
         </div>
       </div>
@@ -131,186 +131,154 @@ export default function AdminPanel() {
         </div>
 
         {activeTab === 'dashboard' && (
-          <div className="stats-grid">
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Users size={20} />
+          <div className="fade-in">
+            <h2 className="text-7xl" style={{ marginBottom: 40 }}>OVERVIEW</h2>
+            <div className="stats-grid" style={{ paddingTop: 0 }}>
+              <div className="stat-item">
+                <span className="stat-label">Total Students</span>
+                <span className="stat-value">{DEMO_STUDENTS.length}</span>
               </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Total Students</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{DEMO_STUDENTS.length}</span>
+              <div className="stat-item">
+                <span className="stat-label">Active Sessions</span>
+                <span className="stat-value text-accent">{activeSessions.length}</span>
               </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Radio size={20} />
+              <div className="stat-item">
+                <span className="stat-label">Today's Attendance</span>
+                <span className="stat-value">{todayAttendance.length}</span>
               </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Active Sessions</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{activeSessions.length}</span>
-              </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarCheck size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Today's Attendance</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{todayAttendance.length}</span>
-              </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Database size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Total Records</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{attendance.length}</span>
+              <div className="stat-item">
+                <span className="stat-label">Total Records</span>
+                <span className="stat-value">{attendance.length}</span>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'sessions' && (
-          <>
-            <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ margin: 0 }}>Sessions</h2>
+          <div className="fade-in">
+            <div className="toolbar">
+              <h2 className="text-6xl">SESSIONS</h2>
               <button className="btn-primary" onClick={() => setShowCreateForm(!showCreateForm)}>
-                <Plus size={16} /> Create Session
+                {showCreateForm ? 'Cancel Creation' : 'Create Session'}
               </button>
             </div>
 
             {showCreateForm && (
-              <div className="glass-card" style={{ padding: 24, marginBottom: 24 }}>
-                <div className="form-group">
-                  <label className="form-label">Session Name</label>
-                  <input
-                    className="input-field w-full"
-                    placeholder="e.g. Data Structures Lecture"
-                    value={sessionForm.name}
-                    onChange={(e) => setSessionForm({ ...sessionForm, name: e.target.value })}
-                  />
+              <div className="card" style={{ marginBottom: 48 }}>
+                <h3 className="text-3xl" style={{ marginBottom: 24 }}>NEW SESSION</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Session Name</label>
+                    <input
+                      className="input-field"
+                      placeholder="e.g. Data Structures Lecture"
+                      value={sessionForm.name}
+                      onChange={(e) => setSessionForm({ ...sessionForm, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Class Name</label>
+                    <input
+                      className="input-field"
+                      placeholder="e.g. CS-201"
+                      value={sessionForm.className}
+                      onChange={(e) => setSessionForm({ ...sessionForm, className: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Start Time</label>
+                    <input
+                      type="datetime-local"
+                      className="input-field"
+                      value={sessionForm.startTime}
+                      onChange={(e) => setSessionForm({ ...sessionForm, startTime: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">End Time</label>
+                    <input
+                      type="datetime-local"
+                      className="input-field"
+                      value={sessionForm.endTime}
+                      onChange={(e) => setSessionForm({ ...sessionForm, endTime: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Class Name</label>
-                  <input
-                    className="input-field w-full"
-                    placeholder="e.g. CS-201"
-                    value={sessionForm.className}
-                    onChange={(e) => setSessionForm({ ...sessionForm, className: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Start Time</label>
-                  <input
-                    type="datetime-local"
-                    className="input-field w-full"
-                    value={sessionForm.startTime}
-                    onChange={(e) => setSessionForm({ ...sessionForm, startTime: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">End Time</label>
-                  <input
-                    type="datetime-local"
-                    className="input-field w-full"
-                    value={sessionForm.endTime}
-                    onChange={(e) => setSessionForm({ ...sessionForm, endTime: e.target.value })}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                <div style={{ marginTop: 32 }}>
                   <button className="btn-primary" onClick={handleCreateSession} disabled={locationStatus === 'getting'}>
-                    {locationStatus === 'getting' ? (
-                      <>
-                        <span className="spinner" style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite', display: 'inline-block' }} />
-                        {' '}Getting location...
-                      </>
-                    ) : (
-                      <>
-                        <MapPin size={16} /> Capture Location &amp; Create
-                      </>
-                    )}
-                  </button>
-                  <button className="btn-secondary" onClick={() => { setShowCreateForm(false); setLocationStatus(''); }}>
-                    Cancel
+                    {locationStatus === 'getting' ? 'Capturing Location...' : 'Capture Location & Create'}
                   </button>
                 </div>
               </div>
             )}
 
             {sessions.length === 0 ? (
-              <div className="empty-state">
-                <Radio size={48} style={{ opacity: 0.3 }} />
-                <p>No sessions created yet</p>
+              <div style={{ padding: '80px 0' }}>
+                <p className="text-xl text-muted">No sessions created yet.</p>
               </div>
             ) : (
-              sessions.map((session) => (
-                <div key={session.id} className="session-card glass-card" style={{ padding: 20, marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ borderTop: '1px solid var(--border)' }}>
+                {sessions.map((session) => (
+                  <div key={session.id} style={{ padding: '32px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                        <strong style={{ fontSize: '1.05rem' }}>{session.name}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+                        <h3 className="text-3xl tracking-tight">{session.name}</h3>
                         {isSessionActive(session) ? (
                           <span className="badge badge-active">Active</span>
                         ) : (
-                          <span className="badge badge-expired">Expired</span>
+                          <span className="badge">Expired</span>
                         )}
                       </div>
-                      <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{session.className}</p>
-                      <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                      <p className="text-muted text-mono text-sm uppercase tracking-wide mb-2">{session.className}</p>
+                      <p className="text-muted">
                         {formatDate(session.startTime)} · {formatTimeRange(session.startTime, session.endTime)}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="btn-secondary" onClick={() => setShowQR(session)}>
-                        <QrCode size={16} /> Show QR
+                    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                      <button className="btn-primary" onClick={() => setShowQR(session)}>
+                        Show QR
                       </button>
-                      <button className="btn-danger" onClick={() => handleDeleteSession(session.id)}>
-                        <Trash2 size={16} /> Delete
+                      <button className="btn-ghost text-muted" onClick={() => handleDeleteSession(session.id)}>
+                        Delete
                       </button>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
 
             {showQR && (
               <div className="modal-overlay" onClick={() => setShowQR(null)}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                   <QRGenerator session={showQR} onClose={() => setShowQR(null)} />
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {activeTab === 'attendance' && (
-          <>
-            <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-              <h2 style={{ margin: 0 }}>Attendance Records</h2>
-              <div className="search-bar" style={{ position: 'relative' }}>
-                <Search className="search-icon" size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+          <div className="fade-in">
+            <div className="toolbar">
+              <h2 className="text-6xl">ATTENDANCE</h2>
+              <div className="search-bar">
                 <input
                   className="input-field"
-                  placeholder="Search by name or session..."
+                  placeholder="SEARCH BY NAME OR SESSION..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ paddingLeft: 40 }}
+                  style={{ textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}
                 />
               </div>
             </div>
 
             {filteredAttendance.length === 0 ? (
-              <div className="empty-state">
-                <Database size={48} style={{ opacity: 0.3 }} />
-                <p>No attendance records found</p>
+              <div style={{ padding: '80px 0' }}>
+                <p className="text-xl text-muted">No attendance records found.</p>
               </div>
             ) : (
-              <div className="table-wrapper" style={{ overflowX: 'auto' }}>
-                <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="data-table">
                   <thead>
                     <tr>
                       <th>Student</th>
@@ -325,24 +293,24 @@ export default function AdminPanel() {
                   <tbody>
                     {filteredAttendance.map((record) => (
                       <tr key={record.id}>
-                        <td>{record.studentName}</td>
-                        <td>{record.rollNumber}</td>
+                        <td style={{ fontWeight: 600 }}>{record.studentName}</td>
+                        <td className="text-mono text-muted text-sm">{record.rollNumber}</td>
                         <td>{record.sessionName}</td>
-                        <td>{formatDate(record.scanTime)}</td>
-                        <td>{formatTime(record.scanTime)}</td>
+                        <td className="text-mono text-sm">{formatDate(record.scanTime)}</td>
+                        <td className="text-mono text-sm">{formatTime(record.scanTime)}</td>
                         <td>
                           <span className={`badge ${record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
                             {record.status}
                           </span>
                         </td>
-                        <td>{record.distance != null ? `${Math.round(record.distance)}m` : '—'}</td>
+                        <td className="text-mono text-sm">{record.distance != null ? `${Math.round(record.distance)}M` : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </>
