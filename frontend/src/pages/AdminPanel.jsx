@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Radio, CalendarCheck, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut, ShieldAlert } from 'lucide-react';
+import { Radio, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
 import { DEMO_STUDENTS } from '../data/students';
 import QRGenerator from '../components/QRGenerator';
 import LiveMonitor from '../components/LiveMonitor';
 import Reports from '../components/Reports';
+import AttendanceTable from '../components/shared/AttendanceTable';
+import DashboardTab from '../components/admin/DashboardTab';
+import AuditLogsTab from '../components/admin/AuditLogsTab';
 import storage from '../utils/storage';
 import { getCurrentPosition } from '../utils/geo';
 
@@ -203,47 +206,11 @@ export default function AdminPanel() {
         )}
 
         {activeTab === 'dashboard' && (
-          <div className="stats-grid">
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Users size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Total Students</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{DEMO_STUDENTS.length}</span>
-              </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Radio size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Active Sessions</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{activeSessions.length}</span>
-              </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarCheck size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Today's Attendance</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{todayAttendance.length}</span>
-              </div>
-            </div>
-
-            <div className="stat-card glass-card">
-              <div className="stat-icon" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Database size={20} />
-              </div>
-              <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Total Records</span>
-                <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{attendance.length}</span>
-              </div>
-            </div>
-          </div>
+          <DashboardTab 
+            activeSessions={activeSessions} 
+            todayAttendance={todayAttendance} 
+            attendance={attendance} 
+          />
         )}
 
         {activeTab === 'sessions' && (
@@ -381,105 +348,15 @@ export default function AdminPanel() {
                 <p>No attendance records found</p>
               </div>
             ) : (
-              <div className="table-wrapper" style={{ overflowX: 'auto' }}>
-                <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th>Roll No</th>
-                      <th>Session</th>
-                      <th>Date</th>
-                      <th>Time</th>
-                      <th>Risk Level</th>
-                      <th>Status</th>
-                      <th>Distance (Origin)</th>
-                      <th>Monitoring</th>
-                      <th>Device ID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAttendance.map((record) => (
-                      <tr key={record.id}>
-                        <td>{record.studentName}</td>
-                        <td>{record.rollNumber}</td>
-                        <td>{record.sessionName}</td>
-                        <td>{formatDate(record.scanTime)}</td>
-                        <td>{formatTime(record.scanTime)}</td>
-                        <td>
-                          <span className={`badge ${
-                            record.riskLevel === 'High' ? 'badge-error' :
-                            record.riskLevel === 'Medium' ? 'badge-warning' :
-                            'badge-success'
-                          }`}>
-                            {record.riskLevel || 'Low'}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
-                            {record.status}
-                          </span>
-                        </td>
-                        <td>{(record.currentDistance ?? record.distance) != null ? `${Math.round(record.currentDistance ?? record.distance)}m` : '—'}</td>
-                        <td>
-                          <span className={`badge ${
-                            record.monitoringStatus === 'Monitoring' ? 'badge-warning' :
-                            record.monitoringStatus === 'Completed' ? 'badge-expired' :
-                            record.monitoringStatus === 'Suspicious' ? 'badge-warning' :
-                            record.monitoringStatus === 'Location Disabled' ? 'badge-error' :
-                            record.monitoringStatus === 'Location Error' ? 'badge-error' : ''
-                          }`}>
-                            {record.monitoringStatus || '—'}
-                          </span>
-                        </td>
-                        <td style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
-                          {record.deviceId || '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="glass-card">
+                <AttendanceTable records={filteredAttendance} isAdmin={true} />
               </div>
             )}
           </>
         )}
 
         {activeTab === 'audit' && (
-          <>
-            <div className="toolbar" style={{ marginBottom: 24 }}>
-              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ShieldAlert size={20} /> Integrity Audit Logs
-              </h2>
-              <p style={{ color: 'var(--text-secondary)', marginTop: 8 }}>Chronological trail of all attendance events.</p>
-            </div>
-            <div className="glass-card" style={{ padding: 24 }}>
-              {storage.getLocationLogs().length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 24 }}>No audit logs recorded yet.</div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {storage.getLocationLogs().sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map((log, i) => {
-                    const stu = DEMO_STUDENTS.find(s => s.id === log.studentId);
-                    const isAlert = log.event?.includes('Disabled') || log.event?.includes('Interrupted');
-                    return (
-                      <div key={log.id || i} style={{ display: 'flex', gap: 16, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 16 }}>
-                        <div style={{ width: 120, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          {new Date(log.timestamp).toLocaleString()}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <strong style={{ display: 'block', marginBottom: 4 }}>{stu ? stu.name : log.studentId}</strong>
-                          <span style={{ color: isAlert ? 'var(--error)' : 'var(--text-primary)' }}>
-                            {log.event || `Location Updated (Distance: ${Math.round(log.distance)}m)`}
-                          </span>
-                        </div>
-                        <div>
-                          <span className={`badge ${log.status === 'Present' ? 'badge-success' : 'badge-error'}`}>{log.status}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </>
+          <AuditLogsTab />
         )}
       </div>
 

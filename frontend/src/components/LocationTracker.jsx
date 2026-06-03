@@ -47,6 +47,7 @@ export default function LocationTracker({
         updateAttendanceStatus(attendanceId, { monitoringStatus: 'Completed' });
         toast.success('Monitoring period completed.');
         if (onComplete) onComplete();
+        if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }, 1000);
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import * as storage from '../utils/storage';
+import AttendanceTable from './shared/AttendanceTable';
 
 export default function AttendanceHistory({ studentId }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,59 +54,15 @@ export default function AttendanceHistory({ studentId }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && records.length === 0 ? (
         <div className="empty-state glass-card" style={{ textAlign: 'center', padding: 48 }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
-            {records.length === 0
-              ? 'No attendance records yet. Scan a QR code to get started!'
-              : 'No records match your search.'}
+            No attendance records yet. Scan a QR code to get started!
           </p>
         </div>
       ) : (
-        <div className="table-wrapper glass-card" style={{ overflowX: 'auto' }}>
-          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Session</th>
-                <th>Status</th>
-                <th>Distance (Origin)</th>
-                <th>Monitoring</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((record) => {
-                const dt = new Date(record.scanTime);
-                return (
-                  <tr key={record.id}>
-                    <td>{dt.toLocaleDateString()}</td>
-                    <td>{dt.toLocaleTimeString()}</td>
-                    <td>{record.sessionName}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          record.status === 'Present' ? 'badge-success' : 'badge-error'
-                        }`}
-                      >
-                        {record.status}
-                      </span>
-                    </td>
-                    <td>{Math.round(record.currentDistance ?? record.distance)}m</td>
-                    <td>
-                      <span className={`badge ${
-                        record.monitoringStatus === 'Monitoring' ? 'badge-warning' :
-                        record.monitoringStatus === 'Completed' ? 'badge-expired' :
-                        record.monitoringStatus === 'Location Error' ? 'badge-error' : ''
-                      }`}>
-                        {record.monitoringStatus || '—'}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="glass-card">
+          <AttendanceTable records={filtered} isAdmin={false} />
         </div>
       )}
     </div>

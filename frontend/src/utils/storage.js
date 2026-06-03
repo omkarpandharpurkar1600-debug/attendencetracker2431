@@ -10,12 +10,16 @@ const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substr(2);
 
 export function getDeviceId() {
-  let deviceId = localStorage.getItem(KEYS.DEVICE_ID);
-  if (!deviceId) {
-    deviceId = 'DEV-' + generateId();
-    localStorage.setItem(KEYS.DEVICE_ID, deviceId);
+  try {
+    let deviceId = localStorage.getItem(KEYS.DEVICE_ID);
+    if (!deviceId) {
+      deviceId = 'DEV-' + generateId();
+      localStorage.setItem(KEYS.DEVICE_ID, deviceId);
+    }
+    return deviceId;
+  } catch {
+    return 'DEV-' + generateId();
   }
-  return deviceId;
 }
 
 // ── Core helpers ──────────────────────────────────────────────
@@ -31,7 +35,11 @@ export function getItem(key) {
 }
 
 export function setItem(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    console.warn('LocalStorage error:', err);
+  }
 }
 
 // ── Sessions ──────────────────────────────────────────────────
@@ -140,13 +148,17 @@ export function setCurrentUser(user) {
 }
 
 export function clearCurrentUser() {
-  localStorage.removeItem(KEYS.CURRENT_USER);
+  try {
+    localStorage.removeItem(KEYS.CURRENT_USER);
+  } catch {}
 }
 
 // ── Utilities ─────────────────────────────────────────────────
 
 export function clearAll() {
-  Object.values(KEYS).forEach((key) => localStorage.removeItem(key));
+  try {
+    Object.values(KEYS).forEach((key) => localStorage.removeItem(key));
+  } catch {}
 }
 
 // ── Default export ────────────────────────────────────────────

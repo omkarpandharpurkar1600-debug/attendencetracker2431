@@ -44,7 +44,11 @@ export default function QRScanner({ onSuccess }) {
         setScanning(true);
       })
       .catch((err) => {
-        toast.error('Could not start camera: ' + err.message);
+        if (err.name === 'NotAllowedError' || err.message?.includes('Permission denied')) {
+          toast.error('Camera access denied. Please grant permission in your browser settings to scan the QR code.', { duration: 5000 });
+        } else {
+          toast.error('Could not start camera: ' + (err.message || 'Unknown error'));
+        }
       });
   };
 
