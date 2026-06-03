@@ -76,7 +76,11 @@ export function AppProvider({ children }) {
       return { success: false, message: 'Invalid QR code data.' };
     }
 
-    const { sessionId, qrToken, lat, lng } = parsed;
+    const { sessionId, qrToken, lat, lng, timestamp } = parsed;
+
+    if (timestamp && Date.now() - timestamp > 60000) {
+      return { success: false, message: 'QR Code has expired. Please scan the new one.' };
+    }
 
     const currentSessions = storage.getSessions();
     const session = currentSessions.find((s) => s.id === sessionId);
@@ -96,7 +100,7 @@ export function AppProvider({ children }) {
     }
 
     if (storage.hasMarkedAttendance(currentUser.id, sessionId)) {
-      return { success: false, message: 'Attendance already marked for this session.' };
+      return { success: false, message: 'Attendance Already Recorded' };
     }
 
     const distance = calculateDistance(
@@ -125,9 +129,25 @@ export function AppProvider({ children }) {
       currentLng: studentLocation.lng,
       currentDistance: distance,
       simulationActive: false,
+      deviceId: storage.getDeviceId(),
+      browserInfo: navigator.userAgent,
+      riskLevel: 'Low',
     };
 
     storage.addAttendance(record);
+    
+    storage.addLocationLog({
+      studentId: currentUser.id,
+      sessionId,
+      attendanceId: record.id,
+      lat: studentLocation.lat,
+      lng: studentLocation.lng,
+      distance,
+      status,
+      timestamp: record.scanTime,
+      event: 'Attendance Marked',
+    });
+    
     refreshData();
     return { success: true, record };
   }, [currentUser, refreshData]);

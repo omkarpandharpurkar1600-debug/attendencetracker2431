@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Radio, CalendarCheck, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut } from 'lucide-react';
+import { Users, Radio, CalendarCheck, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
 import { DEMO_STUDENTS } from '../data/students';
@@ -131,6 +131,9 @@ export default function AdminPanel() {
           </button>
           <button className={`tab ${activeTab === 'attendance' ? 'active' : ''}`} onClick={() => setActiveTab('attendance')}>
             Attendance
+          </button>
+          <button className={`tab ${activeTab === 'audit' ? 'active' : ''}`} onClick={() => setActiveTab('audit')}>
+            Audit Logs
           </button>
         </div>
 
@@ -326,9 +329,11 @@ export default function AdminPanel() {
                       <th>Session</th>
                       <th>Date</th>
                       <th>Time</th>
+                      <th>Risk Level</th>
                       <th>Status</th>
                       <th>Distance (Origin)</th>
                       <th>Monitoring</th>
+                      <th>Device ID</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -340,6 +345,15 @@ export default function AdminPanel() {
                         <td>{formatDate(record.scanTime)}</td>
                         <td>{formatTime(record.scanTime)}</td>
                         <td>
+                          <span className={`badge ${
+                            record.riskLevel === 'High' ? 'badge-error' :
+                            record.riskLevel === 'Medium' ? 'badge-warning' :
+                            'badge-success'
+                          }`}>
+                            {record.riskLevel || 'Low'}
+                          </span>
+                        </td>
+                        <td>
                           <span className={`badge ${record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
                             {record.status}
                           </span>
@@ -349,10 +363,15 @@ export default function AdminPanel() {
                           <span className={`badge ${
                             record.monitoringStatus === 'Monitoring' ? 'badge-warning' :
                             record.monitoringStatus === 'Completed' ? 'badge-expired' :
+                            record.monitoringStatus === 'Suspicious' ? 'badge-warning' :
+                            record.monitoringStatus === 'Location Disabled' ? 'badge-error' :
                             record.monitoringStatus === 'Location Error' ? 'badge-error' : ''
                           }`}>
                             {record.monitoringStatus || '—'}
                           </span>
+                        </td>
+                        <td style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                          {record.deviceId || '—'}
                         </td>
                       </tr>
                     ))}
@@ -360,6 +379,45 @@ export default function AdminPanel() {
                 </table>
               </div>
             )}
+          </>
+        )}
+
+        {activeTab === 'audit' && (
+          <>
+            <div className="toolbar" style={{ marginBottom: 24 }}>
+              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ShieldAlert size={20} /> Integrity Audit Logs
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', marginTop: 8 }}>Chronological trail of all attendance events.</p>
+            </div>
+            <div className="glass-card" style={{ padding: 24 }}>
+              {storage.getLocationLogs().length === 0 ? (
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 24 }}>No audit logs recorded yet.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {storage.getLocationLogs().sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map((log, i) => {
+                    const stu = DEMO_STUDENTS.find(s => s.id === log.studentId);
+                    const isAlert = log.event?.includes('Disabled') || log.event?.includes('Interrupted');
+                    return (
+                      <div key={log.id || i} style={{ display: 'flex', gap: 16, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 16 }}>
+                        <div style={{ width: 120, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          {new Date(log.timestamp).toLocaleString()}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ display: 'block', marginBottom: 4 }}>{stu ? stu.name : log.studentId}</strong>
+                          <span style={{ color: isAlert ? 'var(--error)' : 'var(--text-primary)' }}>
+                            {log.event || `Location Updated (Distance: ${Math.round(log.distance)}m)`}
+                          </span>
+                        </div>
+                        <div>
+                          <span className={`badge ${log.status === 'Present' ? 'badge-success' : 'badge-error'}`}>{log.status}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

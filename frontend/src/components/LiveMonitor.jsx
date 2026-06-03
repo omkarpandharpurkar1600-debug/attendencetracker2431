@@ -277,7 +277,13 @@ export default function LiveMonitor({ activeSessionId }) {
                     </div>
                     <div style={{ fontSize: '0.9rem', lineHeight: 1.4 }}>
                       {log.isSimulation && <span style={{ color: 'var(--accent-primary)', fontSize: '0.75rem', marginRight: 4 }}>[SIM]</span>}
-                      {log.distance === 0 ? 'Attendance Marked' : `Distance: ${Math.round(log.distance)}m`}
+                      {log.event ? (
+                        <span style={{ color: log.event.includes('Interrupted') || log.event.includes('Disabled') ? 'var(--error)' : 'inherit' }}>
+                          {log.event}
+                        </span>
+                      ) : (
+                        log.distance === 0 ? 'Attendance Marked' : `Distance: ${Math.round(log.distance)}m`
+                      )}
                     </div>
                     {i === 0 && log.status === 'Absent' && (
                       <div style={{ fontSize: '0.8rem', color: 'var(--error)', marginTop: 2 }}>Changed to Absent</div>

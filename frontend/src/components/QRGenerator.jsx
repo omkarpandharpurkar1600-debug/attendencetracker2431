@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Download, Maximize2, MapPin } from 'lucide-react';
+import { X, Download, Maximize2, MapPin, Clock } from 'lucide-react';
 
 export default function QRGenerator({ session, onClose }) {
   const [fullscreen, setFullscreen] = useState(false);
+  const [qrTimestamp, setQrTimestamp] = useState(Date.now());
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setQrTimestamp(Date.now());
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const qrValue = JSON.stringify({
     sessionId: session.id,
     qrToken: session.qrToken,
     lat: session.lat,
     lng: session.lng,
+    timestamp: qrTimestamp,
   });
 
   const isActive =
@@ -62,6 +78,10 @@ export default function QRGenerator({ session, onClose }) {
           <span className={`badge ${isActive ? 'badge-success' : 'badge-error'}`}>
             {isActive ? 'Active' : 'Inactive'}
           </span>
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: timeLeft < 10 ? 'var(--error)' : 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>
+            <Clock size={14} /> 
+            QR Expires in: {timeLeft}s
+          </div>
         </div>
 
         <div

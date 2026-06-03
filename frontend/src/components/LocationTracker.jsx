@@ -20,6 +20,27 @@ export default function LocationTracker({
   const intervalRef = useRef(null);
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (Date.now() <= monitoringEndTime) {
+        updateAttendanceStatus(attendanceId, { 
+          monitoringStatus: 'Suspicious',
+          riskLevel: 'Medium'
+        });
+        storage.addLocationLog({
+          studentId: currentUser.id,
+          sessionId,
+          attendanceId,
+          lat: originLat,
+          lng: originLng,
+          distance: 0,
+          status: 'Absent',
+          timestamp: new Date().toISOString(),
+          event: 'Monitoring Interrupted (Tab Closed)'
+        });
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     // Also use a standard interval to check for timeout even if position doesn't change
     intervalRef.current = setInterval(() => {
       if (Date.now() > monitoringEndTime) {
@@ -60,7 +81,8 @@ export default function LocationTracker({
         // Always update distance in storage so UI reflects live distance
         updateAttendanceStatus(attendanceId, { 
           status: newStatus, 
-          currentDistance: distance 
+          currentDistance: distance,
+          riskLevel: newStatus === 'Absent' ? 'High' : 'Low'
         });
 
         if (lastStatusRef.current !== null && lastStatusRef.current !== newStatus) {
@@ -88,7 +110,19 @@ export default function LocationTracker({
         if (Date.now() <= monitoringEndTime) {
           updateAttendanceStatus(attendanceId, { 
             status: 'Absent',
-            monitoringStatus: 'Location Error' 
+            monitoringStatus: 'Location Disabled',
+            riskLevel: 'High'
+          });
+          storage.addLocationLog({
+            studentId: currentUser.id,
+            sessionId,
+            attendanceId,
+            lat: originLat,
+            lng: originLng,
+            distance: 0,
+            status: 'Absent',
+            timestamp: new Date().toISOString(),
+            event: 'Location Disabled'
           });
           toast.error('Location tracking error. Status set to Absent.');
           if (onComplete) onComplete();
@@ -99,6 +133,7 @@ export default function LocationTracker({
 
     return () => {
       cleanup();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [

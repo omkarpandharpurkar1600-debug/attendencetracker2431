@@ -3,10 +3,20 @@ const KEYS = {
   ATTENDANCE: 'gs_attendance',
   LOCATION_LOGS: 'gs_location_logs',
   CURRENT_USER: 'gs_current_user',
+  DEVICE_ID: 'gs_device_id',
 };
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+export function getDeviceId() {
+  let deviceId = localStorage.getItem(KEYS.DEVICE_ID);
+  if (!deviceId) {
+    deviceId = 'DEV-' + generateId();
+    localStorage.setItem(KEYS.DEVICE_ID, deviceId);
+  }
+  return deviceId;
+}
 
 // ── Core helpers ──────────────────────────────────────────────
 
@@ -99,7 +109,7 @@ export function getAttendanceForSession(sessionId) {
 
 export function hasMarkedAttendance(studentId, sessionId) {
   return getAttendance().some(
-    (r) => r.studentId === studentId && r.sessionId === sessionId && r.status !== 'Absent'
+    (r) => r.studentId === studentId && r.sessionId === sessionId
   );
 }
 
@@ -163,6 +173,7 @@ const storage = {
   setCurrentUser,
   clearCurrentUser,
   clearAll,
+  getDeviceId,
 };
 
 export default storage;
