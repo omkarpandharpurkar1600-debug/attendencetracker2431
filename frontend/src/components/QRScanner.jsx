@@ -192,7 +192,7 @@ export default function QRScanner({ onSuccess }) {
             </div>
             <div className="detail-row">
               <span className="detail-label">Distance</span>
-              <span className="detail-value">{Math.round(result.record.distance)}m</span>
+              <span className="detail-value">{Math.round(result.record.currentDistance ?? 0)}m</span>
             </div>
           </div>
           <button

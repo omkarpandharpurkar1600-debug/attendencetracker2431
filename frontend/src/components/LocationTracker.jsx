@@ -146,8 +146,7 @@ export default function LocationTracker({
     simulationActive,
     currentUser,
     updateAttendanceStatus,
-    onStatusChange,
-    onComplete,
+    // onStatusChange and onComplete omitted to prevent infinite loops from unstable references
   ]);
 
   return null;
