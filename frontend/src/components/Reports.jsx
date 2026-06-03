@@ -4,7 +4,6 @@ import storage from '../utils/storage';
 
 export default function Reports() {
   const allAttendance = storage.getAttendance();
-  const allStudents = storage.getUsers().filter(u => u.role === 'student').length;
   
   const totalRecords = allAttendance.length;
   const present = allAttendance.filter(a => a.status === 'Present').length;
