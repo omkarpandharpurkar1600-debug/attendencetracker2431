@@ -50,9 +50,10 @@ export default function Login() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.6 }}>
-          College Demo Project
-        </p>
+        <div style={{ textAlign: 'center', marginTop: 24, fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.8, lineHeight: '1.5' }}>
+          Made by <strong>Omkar, Bhavana, Yash, & Kartik</strong><br />
+          KLS Gogte Institute Of Technology, Belagavi, Karnataka
+        </div>
       </div>
     </div>
   );
