@@ -29,7 +29,7 @@ export default function Landing() {
 
       {/* Hero Section */}
       <header style={{ padding: '120px 24px', textAlign: 'center', maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
-        <div className="badge badge-active" style={{ fontSize: '0.85rem', padding: '6px 16px', borderRadius: 20 }}>Final Year Project Demonstration</div>
+        <div className="badge badge-active" style={{ fontSize: '0.85rem', padding: '6px 16px', borderRadius: 20 }}>First Year Project Demonstration</div>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.1, margin: 0, background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
           QR-Based Smart Attendance<br/>with Location Validation
         </h1>

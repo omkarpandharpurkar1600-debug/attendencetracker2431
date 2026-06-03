@@ -488,7 +488,7 @@ export default function AdminPanel() {
           <div className="modal-content glass-card fade-in" style={{ maxWidth: 400 }}>
             <h3 style={{ marginTop: 0, marginBottom: 16 }}>Project Demo Controls</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 24 }}>
-              Use these tools during your final-year presentation to quickly reset state or generate mock data to showcase the analytics.
+              Use these tools during your first-year presentation to quickly reset state or generate mock data to showcase the analytics.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <button className="btn-primary" onClick={handleGenerateSamples} disabled={isGenerating}>
