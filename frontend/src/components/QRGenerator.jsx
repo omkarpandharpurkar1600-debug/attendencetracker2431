@@ -46,21 +46,21 @@ export default function QRGenerator({ session, onClose }) {
 
   return (
     <>
-      <div className="qr-container fade-in" style={{ padding: 48, background: 'var(--background)', border: '1px solid var(--border)' }}>
-        <div className="modal-header" style={{ marginBottom: 48 }}>
-          <h3 className="text-3xl tracking-tight" style={{ margin: 0 }}>SESSION QR</h3>
-          <button className="btn-ghost" onClick={onClose}>
-            CLOSE <X size={18} />
+      <div className="qr-container glass-card fade-in">
+        <div className="modal-header">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Session QR Code</h3>
+          <button className="btn-icon" onClick={onClose}>
+            <X size={18} />
           </button>
         </div>
 
-        <div style={{ marginBottom: 48 }}>
-          <h4 className="text-4xl" style={{ marginBottom: 8 }}>{session.name}</h4>
-          <p className="text-mono text-muted uppercase tracking-wide" style={{ marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 4 }}>{session.name}</h4>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
             {session.className}
           </p>
           <span className={`badge ${isActive ? 'badge-success' : 'badge-error'}`}>
-            {isActive ? 'ACTIVE' : 'INACTIVE'}
+            {isActive ? 'Active' : 'Inactive'}
           </span>
         </div>
 
@@ -68,16 +68,16 @@ export default function QRGenerator({ session, onClose }) {
           className="qr-code-area"
           style={{
             background: '#ffffff',
-            padding: 32,
+            borderRadius: 16,
+            padding: 24,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            margin: '0 auto 32px',
-            maxWidth: 320,
-            border: '1px solid var(--border)',
+            margin: '0 auto',
+            maxWidth: 280,
           }}
         >
-          <QRCodeSVG value={qrValue} size={256} level="H" includeMargin />
+          <QRCodeSVG value={qrValue} size={220} level="H" includeMargin />
         </div>
 
         <div
@@ -85,24 +85,24 @@ export default function QRGenerator({ session, onClose }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 12,
-            marginBottom: 48,
-            color: 'var(--muted-foreground)',
+            gap: 6,
+            marginTop: 16,
+            color: 'var(--text-secondary)',
+            fontSize: '0.8rem',
           }}
-          className="text-mono uppercase"
         >
-          <MapPin size={16} />
+          <MapPin size={14} />
           <span>
             {session.lat.toFixed(4)}, {session.lng.toFixed(4)}
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'center' }}>
           <button className="btn-secondary" onClick={downloadQR}>
-            <Download size={16} /> DOWNLOAD
+            <Download size={16} /> Download
           </button>
           <button className="btn-secondary" onClick={() => setFullscreen(true)}>
-            <Maximize2 size={16} /> FULLSCREEN
+            <Maximize2 size={16} /> Fullscreen
           </button>
         </div>
       </div>
@@ -113,8 +113,11 @@ export default function QRGenerator({ session, onClose }) {
           onClick={() => setFullscreen(false)}
           style={{
             position: 'fixed',
-            inset: 0,
-            background: 'var(--background)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.85)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -126,14 +129,23 @@ export default function QRGenerator({ session, onClose }) {
           <div
             style={{
               background: '#ffffff',
-              padding: 64,
-              border: '1px solid var(--border)'
+              borderRadius: 24,
+              padding: 40,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <QRCodeSVG value={qrValue} size={480} level="H" includeMargin />
+            <QRCodeSVG value={qrValue} size={360} level="H" includeMargin />
           </div>
-          <p className="text-mono text-muted uppercase tracking-wide" style={{ marginTop: 48 }}>
-            CLICK ANYWHERE TO CLOSE
+          <p
+            style={{
+              color: 'rgba(255,255,255,0.6)',
+              marginTop: 24,
+              fontSize: '0.9rem',
+            }}
+          >
+            Tap anywhere to close
           </p>
         </div>
       )}

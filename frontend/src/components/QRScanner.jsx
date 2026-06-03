@@ -125,67 +125,78 @@ export default function QRScanner({ onSuccess }) {
     <div className="fade-in">
       {!result ? (
         <>
-          <div className="qr-reader-wrapper" style={{ background: 'transparent', border: '1px solid var(--border)' }}>
+          <div className="qr-reader-wrapper">
             <div id="qr-reader" style={{ width: '100%' }} />
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 40 }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
             {!scanning && !processing && (
               <button className="btn-primary" onClick={startScanner}>
-                START SCANNER <Camera size={16} />
+                <Camera size={18} /> Start Scanner
               </button>
             )}
             {scanning && (
               <button className="btn-secondary" onClick={stopScanner}>
-                STOP SCANNER <X size={16} />
+                <X size={18} /> Stop Scanner
               </button>
             )}
             {processing && (
-              <div className="text-mono text-muted uppercase tracking-wide flex-center" style={{ gap: 8 }}>
-                <span className="spinner" style={{ width: 16, height: 16, border: '2px solid var(--border)', borderTopColor: 'var(--foreground)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                PROCESSING LOCATION...
+              <div className="loader-center">
+                <div className="spinner" />
               </div>
             )}
           </div>
         </>
       ) : (
-        <div className="fade-in" style={{ padding: '40px 0' }}>
-          <h3 className="text-6xl text-accent" style={{ marginBottom: 16 }}>
-            SUCCESS
+        <div className="success-animation">
+          <div className="success-checkmark">
+            <CheckCircle size={32} />
+          </div>
+          <h3 style={{ fontSize: '1.3rem', fontWeight: 600, marginBottom: 4 }}>
+            Attendance Marked!
           </h3>
-          <p className="text-xl text-muted" style={{ marginBottom: 48 }}>
-            Your attendance has been cryptographically recorded.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            Your attendance has been recorded
           </p>
-          
-          <div style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '24px 0', marginBottom: 40 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px 24px', alignItems: 'center' }}>
-              <span className="text-mono text-sm text-muted uppercase">Student</span>
-              <span className="text-xl font-display">{result.record.studentName}</span>
-              
-              <span className="text-mono text-sm text-muted uppercase">Roll Number</span>
-              <span className="text-xl text-mono">{result.record.rollNumber}</span>
-              
-              <span className="text-mono text-sm text-muted uppercase">Session</span>
-              <span className="text-xl font-display">{result.record.sessionName}</span>
-              
-              <span className="text-mono text-sm text-muted uppercase">Timestamp</span>
-              <span className="text-xl text-mono">
+          <div className="success-details">
+            <div className="detail-row">
+              <span className="detail-label">Student</span>
+              <span className="detail-value">{result.record.studentName}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Roll Number</span>
+              <span className="detail-value">{result.record.rollNumber}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Session</span>
+              <span className="detail-value">{result.record.sessionName}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Date &amp; Time</span>
+              <span className="detail-value">
                 {new Date(result.record.scanTime).toLocaleString()}
               </span>
-              
-              <span className="text-mono text-sm text-muted uppercase">Status</span>
-              <span>
-                <span className={`badge ${result.record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
-                  {result.record.status}
-                </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Status</span>
+              <span
+                className={`badge ${
+                  result.record.status === 'Present' ? 'badge-success' : 'badge-error'
+                }`}
+              >
+                {result.record.status}
               </span>
-              
-              <span className="text-mono text-sm text-muted uppercase">Distance</span>
-              <span className="text-xl text-mono">{Math.round(result.record.distance)}M</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Distance</span>
+              <span className="detail-value">{Math.round(result.record.distance)}m</span>
             </div>
           </div>
-
-          <button className="btn-primary" onClick={handleDone}>
-            CONTINUE
+          <button
+            className="btn-primary w-full"
+            style={{ marginTop: 20 }}
+            onClick={handleDone}
+          >
+            Done
           </button>
         </div>
       )}

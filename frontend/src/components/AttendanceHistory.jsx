@@ -19,28 +19,51 @@ export default function AttendanceHistory({ studentId }) {
 
   return (
     <div className="fade-in">
-      <div className="search-bar" style={{ marginBottom: 40, maxWidth: '100%' }}>
-        <input
-          type="text"
-          placeholder="SEARCH BY SESSION NAME..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input-field"
-          style={{ textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}
-        />
+      <div className="page-header">
+        <h2>Attendance History</h2>
+      </div>
+
+      <div className="search-bar" style={{ marginBottom: 20 }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            maxWidth: 400,
+          }}
+        >
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              left: 12,
+              color: 'var(--text-secondary)',
+              pointerEvents: 'none',
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Search by session name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input-field"
+            style={{ paddingLeft: 36, width: '100%' }}
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="empty-state" style={{ padding: '80px 0' }}>
-          <p className="text-xl text-muted">
+        <div className="empty-state glass-card" style={{ textAlign: 'center', padding: 48 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
             {records.length === 0
-              ? 'No attendance records yet. Scan a QR code to get started.'
+              ? 'No attendance records yet. Scan a QR code to get started!'
               : 'No records match your search.'}
           </p>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto', borderTop: '1px solid var(--border)' }}>
-          <table className="data-table">
+        <div className="table-wrapper glass-card" style={{ overflowX: 'auto' }}>
+          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
                 <th>Date</th>
@@ -55,9 +78,9 @@ export default function AttendanceHistory({ studentId }) {
                 const dt = new Date(record.scanTime);
                 return (
                   <tr key={record.id}>
-                    <td className="text-mono text-sm">{dt.toLocaleDateString()}</td>
-                    <td className="text-mono text-sm">{dt.toLocaleTimeString()}</td>
-                    <td style={{ fontWeight: 600 }}>{record.sessionName}</td>
+                    <td>{dt.toLocaleDateString()}</td>
+                    <td>{dt.toLocaleTimeString()}</td>
+                    <td>{record.sessionName}</td>
                     <td>
                       <span
                         className={`badge ${
@@ -67,7 +90,7 @@ export default function AttendanceHistory({ studentId }) {
                         {record.status}
                       </span>
                     </td>
-                    <td className="text-mono text-sm">{Math.round(record.distance)}M</td>
+                    <td>{Math.round(record.distance)}m</td>
                   </tr>
                 );
               })}

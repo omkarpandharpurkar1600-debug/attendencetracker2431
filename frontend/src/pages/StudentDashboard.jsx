@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, ArrowRight, ArrowLeft } from 'lucide-react';
+import { LogOut, Calendar, CheckCircle, BarChart3, QrCode, History, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import QRScanner from '../components/QRScanner';
 import AttendanceHistory from '../components/AttendanceHistory';
@@ -23,71 +23,93 @@ export default function StudentDashboard() {
   return (
     <>
       <div className="navbar">
-        <span className="navbar-brand">GEOSECURE.</span>
+        <span className="navbar-brand">GeoSecure</span>
         <div className="navbar-right">
           {trackingSession && (
-            <div className="tracking-indicator text-accent text-mono text-xs uppercase tracking-wider flex-center" style={{ gap: 8 }}>
-              <span className="tracking-dot" style={{ width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-              Tracking Active
+            <div className="tracking-indicator">
+              <span className="tracking-dot" />
+              Location tracking active
             </div>
           )}
-          <span className="text-mono text-sm tracking-wide">{currentUser.name}</span>
-          <button className="btn-ghost" onClick={logout}>
-            LOGOUT
+          <span>{currentUser.name}</span>
+          <button className="btn-icon" onClick={logout}>
+            <LogOut size={18} />
           </button>
         </div>
       </div>
 
       <div className="page-content">
         {view === 'dashboard' && (
-          <div className="fade-in">
-            <div className="section" style={{ paddingTop: 0, paddingBottom: 40, borderBottom: 'none' }}>
-              <h1 className="text-7xl" style={{ marginBottom: 16 }}>WELCOME, {currentUser.name.split(' ')[0].toUpperCase()}</h1>
-              <p className="text-xl text-muted">Scan QR to authenticate your location.</p>
+          <>
+            <div className="page-header">
+              <h1>Welcome back, {currentUser.name} 👋</h1>
+              <p>Mark your attendance and track your records</p>
             </div>
 
             <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-label">Total Classes</span>
-                <span className="stat-value">{totalClasses}</span>
+              <div className="stat-card glass-card">
+                <div
+                  className="stat-icon"
+                  style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Calendar size={20} />
+                </div>
+                <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Total Classes</span>
+                  <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{totalClasses}</span>
+                </div>
               </div>
-              <div className="stat-item">
-                <span className="stat-label">Present</span>
-                <span className="stat-value">{presentCount}</span>
+
+              <div className="stat-card glass-card">
+                <div
+                  className="stat-icon"
+                  style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <CheckCircle size={20} />
+                </div>
+                <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Present</span>
+                  <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{presentCount}</span>
+                </div>
               </div>
-              <div className="stat-item">
-                <span className="stat-label">Attendance Rate</span>
-                <span className="stat-value text-accent">{percentage}%</span>
+
+              <div className="stat-card glass-card">
+                <div
+                  className="stat-icon"
+                  style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <BarChart3 size={20} />
+                </div>
+                <div className="stat-info" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span className="stat-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Attendance %</span>
+                  <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>{percentage}%</span>
+                </div>
               </div>
             </div>
 
-            <div className="action-grid">
-              <div className="action-item" onClick={() => setView('scanner')}>
-                <h3 className="text-3xl font-display uppercase tracking-tight">Scan QR Code</h3>
-                <div style={{ marginTop: 32 }}>
-                  <span className="btn-primary" style={{ border: 'none', background: 'transparent' }}>
-                    Open Scanner <ArrowRight size={16} />
-                  </span>
-                </div>
+            <div className="action-grid" style={{ marginTop: 32 }}>
+              <div className="action-card glass-card" onClick={() => setView('scanner')}>
+                <QrCode size={32} />
+                <h3>Scan QR Code</h3>
+                <p>Scan to mark attendance</p>
               </div>
-              <div className="action-item" onClick={() => setView('history')}>
-                <h3 className="text-3xl font-display uppercase tracking-tight">View History</h3>
-                <div style={{ marginTop: 32 }}>
-                  <span className="btn-primary" style={{ border: 'none', background: 'transparent' }}>
-                    View Records <ArrowRight size={16} />
-                  </span>
-                </div>
+              <div className="action-card glass-card" onClick={() => setView('history')}>
+                <History size={32} />
+                <h3>View History</h3>
+                <p>See your attendance records</p>
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {view === 'scanner' && (
-          <div className="fade-in">
-            <button className="btn-ghost" onClick={() => setView('dashboard')} style={{ marginBottom: 40, paddingLeft: 0 }}>
-              <ArrowLeft size={16} /> BACK TO DASHBOARD
+          <>
+            <button className="btn-secondary" onClick={() => setView('dashboard')} style={{ marginBottom: 16 }}>
+              <ArrowLeft size={16} /> Back to Dashboard
             </button>
-            <h2 className="text-5xl" style={{ marginBottom: 32 }}>SCAN QR CODE</h2>
+            <div className="page-header">
+              <h2>Scan QR Code</h2>
+            </div>
             <QRScanner
               onSuccess={(result) => {
                 setTrackingSession({
@@ -99,17 +121,16 @@ export default function StudentDashboard() {
                 setView('dashboard');
               }}
             />
-          </div>
+          </>
         )}
 
         {view === 'history' && (
-          <div className="fade-in">
-            <button className="btn-ghost" onClick={() => setView('dashboard')} style={{ marginBottom: 40, paddingLeft: 0 }}>
-              <ArrowLeft size={16} /> BACK TO DASHBOARD
+          <>
+            <button className="btn-secondary" onClick={() => setView('dashboard')} style={{ marginBottom: 16 }}>
+              <ArrowLeft size={16} /> Back to Dashboard
             </button>
-            <h2 className="text-5xl" style={{ marginBottom: 32 }}>ATTENDANCE HISTORY</h2>
             <AttendanceHistory studentId={currentUser.id} />
-          </div>
+          </>
         )}
       </div>
 
