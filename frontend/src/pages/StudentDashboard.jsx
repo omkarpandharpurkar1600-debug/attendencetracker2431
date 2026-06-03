@@ -192,6 +192,7 @@ export default function StudentDashboard() {
           originLng={activeAttendance.originLng}
           monitoringEndTime={activeAttendance.monitoringEndTime}
           attendanceId={activeAttendance.id}
+          simulationActive={activeAttendance.simulationActive}
           onStatusChange={() => refreshData()}
           onComplete={() => refreshData()}
         />

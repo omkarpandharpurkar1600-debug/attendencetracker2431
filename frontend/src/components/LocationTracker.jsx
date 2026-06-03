@@ -11,6 +11,7 @@ export default function LocationTracker({
   originLng,
   monitoringEndTime,
   attendanceId,
+  simulationActive,
   onStatusChange,
   onComplete,
 }) {
@@ -30,9 +31,10 @@ export default function LocationTracker({
 
     const cleanup = watchPosition(
       (position) => {
-        if (Date.now() > monitoringEndTime) {
-          return; // Ignore updates after completion
-        }
+        if (Date.now() > monitoringEndTime) return;
+        
+        // Pause real GPS tracking if simulation is currently controlling this record
+        if (simulationActive) return;
 
         const distance = calculateDistance(
           position.lat,
@@ -105,6 +107,7 @@ export default function LocationTracker({
     originLng,
     monitoringEndTime,
     attendanceId,
+    simulationActive,
     currentUser,
     updateAttendanceStatus,
     onStatusChange,

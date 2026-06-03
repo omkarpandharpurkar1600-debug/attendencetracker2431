@@ -89,13 +89,17 @@ export function getAttendanceForStudent(studentId) {
   return getAttendance().filter((r) => r.studentId === studentId);
 }
 
+export function getAttendanceById(id) {
+  return getAttendance().find((r) => r.id === id);
+}
+
 export function getAttendanceForSession(sessionId) {
   return getAttendance().filter((r) => r.sessionId === sessionId);
 }
 
 export function hasMarkedAttendance(studentId, sessionId) {
   return getAttendance().some(
-    (r) => r.studentId === studentId && r.sessionId === sessionId
+    (r) => r.studentId === studentId && r.sessionId === sessionId && r.status !== 'Absent'
   );
 }
 

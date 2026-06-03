@@ -121,7 +121,10 @@ export function AppProvider({ children }) {
       monitoringEndTime: Date.now() + MONITORING_DURATION_MS,
       originLat: studentLocation.lat,
       originLng: studentLocation.lng,
+      currentLat: studentLocation.lat,
+      currentLng: studentLocation.lng,
       currentDistance: distance,
+      simulationActive: false,
     };
 
     storage.addAttendance(record);
@@ -131,6 +134,39 @@ export function AppProvider({ children }) {
 
   const updateAttendanceStatus = useCallback((attendanceId, newStatus) => {
     storage.updateAttendance(attendanceId, newStatus);
+    refreshData();
+  }, [refreshData]);
+
+  const simulateMovement = useCallback((attendanceId, latOffset, lngOffset) => {
+    const record = storage.getAttendanceById(attendanceId);
+    if (!record) return;
+
+    const newLat = (record.currentLat || record.originLat) + latOffset;
+    const newLng = (record.currentLng || record.originLng) + lngOffset;
+
+    const distance = calculateDistance(newLat, newLng, record.originLat, record.originLng);
+    const newStatus = distance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
+
+    storage.addLocationLog({
+      studentId: record.studentId,
+      sessionId: record.sessionId,
+      attendanceId: record.id,
+      lat: newLat,
+      lng: newLng,
+      distance,
+      status: newStatus,
+      timestamp: new Date().toISOString(),
+      isSimulation: true,
+    });
+
+    const updates = {
+      currentLat: newLat,
+      currentLng: newLng,
+      currentDistance: distance,
+      status: newStatus,
+      simulationActive: true,
+    };
+    storage.updateAttendance(attendanceId, updates);
     refreshData();
   }, [refreshData]);
 
@@ -144,6 +180,7 @@ export function AppProvider({ children }) {
     createSession,
     markAttendance,
     updateAttendanceStatus,
+    simulateMovement,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

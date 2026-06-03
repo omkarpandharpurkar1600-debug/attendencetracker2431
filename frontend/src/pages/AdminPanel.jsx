@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
 import { DEMO_STUDENTS } from '../data/students';
 import QRGenerator from '../components/QRGenerator';
+import LiveMonitor from '../components/LiveMonitor';
 import storage from '../utils/storage';
 import { getCurrentPosition } from '../utils/geo';
 
@@ -122,6 +123,9 @@ export default function AdminPanel() {
           <button className={`tab ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             Dashboard
           </button>
+          <button className={`tab ${activeTab === 'live' ? 'active' : ''}`} onClick={() => setActiveTab('live')}>
+            Live Monitor
+          </button>
           <button className={`tab ${activeTab === 'sessions' ? 'active' : ''}`} onClick={() => setActiveTab('sessions')}>
             Sessions
           </button>
@@ -129,6 +133,10 @@ export default function AdminPanel() {
             Attendance
           </button>
         </div>
+
+        {activeTab === 'live' && (
+          <LiveMonitor activeSessionId={activeSessions.length > 0 ? activeSessions[0].id : null} />
+        )}
 
         {activeTab === 'dashboard' && (
           <div className="stats-grid">
