@@ -58,7 +58,7 @@ export default function Landing() {
           <div className="glass-card" style={{ borderTop: '4px solid var(--success)' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--success)' }}><ShieldCheck size={24} /> The Solution</h3>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              GeoSecure bridges the gap by demanding <strong>Cryptographic Time</strong> and <strong>Physical Location</strong>. Our dynamic QR codes expire every 60 seconds, and the app utilizes HTML5 Geolocation to monitor the student's physical radius from their scan point for a defined period.
+              GeoSecure bridges the gap by demanding <strong>Cryptographic Time</strong> and <strong>Physical Location</strong>. Our dynamic QR codes expire every 10 minutes, and the app utilizes HTML5 Geolocation to monitor the student's physical radius from their scan point for a defined period.
             </p>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function Landing() {
           <div style={{ position: 'absolute', left: 40, top: 20, bottom: 20, width: 2, background: 'linear-gradient(to bottom, var(--accent-primary), var(--error))', zIndex: -1 }} />
           
           {[
-            { icon: <QrCode />, title: '1. Teacher Generates QR', desc: 'A dynamic QR code is projected on the screen with a 60-second expiry.' },
+            { icon: <QrCode />, title: '1. Teacher Generates QR', desc: 'A dynamic QR code is projected on the screen with a 10-minute expiry.' },
             { icon: <Smartphone />, title: '2. Student Scans QR', desc: 'Student scans using their mobile device.' },
             { icon: <CheckCircle />, title: '3. Attendance Marked', desc: 'Initial validation succeeds. Student is marked Present.' },
             { icon: <MapPin />, title: '4. GPS Location Captured', desc: 'The exact latitude/longitude of the scan is locked as the Origin point.' },

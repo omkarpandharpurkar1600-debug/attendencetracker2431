@@ -5,14 +5,14 @@ import { X, Download, Maximize2, MapPin, Clock } from 'lucide-react';
 export default function QRGenerator({ session, onClose }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [qrTimestamp, setQrTimestamp] = useState(Date.now());
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(600);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setQrTimestamp(Date.now());
-          return 60;
+          return 600;
         }
         return prev - 1;
       });
