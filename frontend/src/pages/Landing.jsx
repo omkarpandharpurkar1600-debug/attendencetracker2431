@@ -156,6 +156,10 @@ export default function Landing() {
         <p style={{ color: 'var(--text-secondary)' }}>
           KLS Gogte Institute Of Technology, Belagavi, Karnataka
         </p>
+        <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <p>© 2026 GeoSecure Attendance. All rights reserved.</p>
+          <p style={{ marginTop: 4 }}>Released under the MIT License.</p>
+        </div>
       </footer>
     </div>
   );
