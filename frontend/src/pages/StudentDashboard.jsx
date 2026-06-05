@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, Calendar, CheckCircle, BarChart3, QrCode, History, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { GEOFENCE_RADIUS_METERS } from '../data/students';
 import QRScanner from '../components/QRScanner';
 import AttendanceHistory from '../components/AttendanceHistory';
 import LocationTracker from '../components/LocationTracker';
@@ -14,7 +15,7 @@ export default function StudentDashboard() {
     refreshData();
   }, []);
 
-  const studentAttendance = attendance.filter((a) => a.studentId === currentUser.id);
+  const studentAttendance = attendance.filter((a) => a.studentId === currentUser.studentId);
   const totalClasses = studentAttendance.length;
   const presentCount = studentAttendance.filter((a) => a.status === 'Present').length;
   const percentage = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0;
@@ -75,14 +76,16 @@ export default function StudentDashboard() {
                       Active Monitoring
                     </h3>
                     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      Stay within 20m of your scan location.
+                      Stay within range of your scan location.
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: 24, textAlign: 'right' }}>
                     <div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Distance</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Range</div>
                       <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>
-                        {activeAttendance.currentDistance != null ? `${Math.round(activeAttendance.currentDistance)}m` : '—'}
+                        <span className={`badge ${activeAttendance.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
+                          {activeAttendance.status === 'Present' ? 'Within Range' : 'Out of Range'}
+                        </span>
                       </div>
                     </div>
                     <div>
@@ -180,7 +183,7 @@ export default function StudentDashboard() {
             <button className="btn-secondary" onClick={() => setView('dashboard')} style={{ marginBottom: 16 }}>
               <ArrowLeft size={16} /> Back to Dashboard
             </button>
-            <AttendanceHistory studentId={currentUser.id} />
+            <AttendanceHistory studentId={currentUser.studentId} />
           </>
         )}
       </div>

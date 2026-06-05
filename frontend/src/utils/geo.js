@@ -7,39 +7,58 @@
  * Get the device's current position with high accuracy.
  * @returns {Promise<{lat: number, lng: number}>}
  */
-export function getCurrentPosition() {
+export function getCurrentPosition(requiredAccuracy = 25, timeoutMs = 10000) {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject('Geolocation is not supported by this browser.');
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    let watchId;
+    let timeoutId;
+    let bestPosition = null;
+
+    const cleanup = () => {
+      if (watchId !== undefined) navigator.geolocation.clearWatch(watchId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+
+    timeoutId = setTimeout(() => {
+      cleanup();
+      if (bestPosition) {
+        resolve(bestPosition); // Resolve with whatever best accuracy we got
+      } else {
+        reject('Location request timed out. Please try again.');
+      }
+    }, timeoutMs);
+
+    watchId = navigator.geolocation.watchPosition(
       (position) => {
-        resolve({
+        const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        });
+          accuracy: position.coords.accuracy
+        };
+
+        if (!bestPosition || coords.accuracy < bestPosition.accuracy) {
+          bestPosition = coords;
+        }
+
+        // If we hit our desired accuracy threshold (e.g. within 25 meters), resolve immediately
+        if (coords.accuracy <= requiredAccuracy) {
+          cleanup();
+          resolve(coords);
+        }
       },
       (error) => {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            reject('Location permission denied. Please enable location access in your browser settings.');
-            break;
-          case error.POSITION_UNAVAILABLE:
-            reject('Location information is unavailable. Please try again.');
-            break;
-          case error.TIMEOUT:
-            reject('Location request timed out. Please try again.');
-            break;
-          default:
-            reject('An unknown error occurred while retrieving location.');
-            break;
+        if (!bestPosition) {
+          cleanup();
+          reject('Location error: ' + error.message);
         }
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: timeoutMs,
         maximumAge: 0,
       }
     );
@@ -93,20 +112,29 @@ export function isWithinRadius(lat1, lng1, lat2, lng2, radiusMeters) {
  * @param {number} [intervalMs=15000] - Polling interval in milliseconds.
  * @returns {function} Cleanup function that stops polling when called.
  */
-export function watchPosition(callback, errorCallback, intervalMs = 15000) {
-  const poll = () => {
-    getCurrentPosition()
-      .then(({ lat, lng }) => {
-        callback({ lat, lng, timestamp: Date.now() });
-      })
-      .catch((err) => {
-        if (errorCallback) errorCallback(err);
+export function watchPosition(callback, errorCallback) {
+  if (!navigator.geolocation) {
+    if (errorCallback) errorCallback(new Error('Geolocation is not supported'));
+    return () => {};
+  }
+
+  const watchId = navigator.geolocation.watchPosition(
+    (position) => {
+      callback({ 
+        lat: position.coords.latitude, 
+        lng: position.coords.longitude, 
+        timestamp: Date.now() 
       });
-  };
+    },
+    (error) => {
+      if (errorCallback) errorCallback(error);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000
+    }
+  );
 
-  // Fire immediately, then on interval
-  poll();
-  const intervalId = setInterval(poll, intervalMs);
-
-  return () => clearInterval(intervalId);
+  return () => navigator.geolocation.clearWatch(watchId);
 }

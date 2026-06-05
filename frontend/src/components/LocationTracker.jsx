@@ -23,11 +23,12 @@ export default function LocationTracker({
     const handleBeforeUnload = () => {
       if (Date.now() <= monitoringEndTime) {
         updateAttendanceStatus(attendanceId, { 
+          status: 'Absent',
           monitoringStatus: 'Suspicious',
           riskLevel: 'Medium'
         });
         storage.addLocationLog({
-          studentId: currentUser.id,
+          studentId: currentUser.studentId,
           sessionId,
           attendanceId,
           lat: originLat,
@@ -69,7 +70,7 @@ export default function LocationTracker({
 
         // Log location to storage
         storage.addLocationLog({
-          studentId: currentUser.id,
+          studentId: currentUser.studentId,
           sessionId,
           attendanceId,
           lat: position.lat,
@@ -89,12 +90,12 @@ export default function LocationTracker({
         if (lastStatusRef.current !== null && lastStatusRef.current !== newStatus) {
           if (newStatus === 'Absent') {
             toast.error(
-              `You moved outside the allowed radius (${Math.round(distance)}m away). Status changed to Absent.`,
+              'You moved out of range! Status changed to Absent.',
               { duration: 5000 }
             );
           } else {
             toast.success(
-              `You are back within the allowed radius (${Math.round(distance)}m). Status changed to Present.`,
+              'You are back within range. Status changed to Present.',
               { duration: 5000 }
             );
           }
@@ -115,7 +116,7 @@ export default function LocationTracker({
             riskLevel: 'High'
           });
           storage.addLocationLog({
-            studentId: currentUser.id,
+            studentId: currentUser.studentId,
             sessionId,
             attendanceId,
             lat: originLat,

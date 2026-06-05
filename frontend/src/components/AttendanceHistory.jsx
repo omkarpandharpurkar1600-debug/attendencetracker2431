@@ -1,21 +1,22 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import * as storage from '../utils/storage';
 import AttendanceTable from './shared/AttendanceTable';
 
 export default function AttendanceHistory({ studentId }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [records, setRecords] = useState([]);
 
-  const records = useMemo(() => {
-    const all = storage.getAttendanceForStudent(studentId);
-    // Sort newest first
-    return all.sort((a, b) => new Date(b.scanTime) - new Date(a.scanTime));
+  useEffect(() => {
+    storage.getAttendanceForStudent(studentId).then((data) => {
+      setRecords(data.sort((a, b) => new Date(b.scanTime) - new Date(a.scanTime)));
+    });
   }, [studentId]);
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return records;
     const q = searchQuery.toLowerCase();
-    return records.filter((r) => r.sessionName.toLowerCase().includes(q));
+    return records.filter((r) => (r.sessionName || '').toLowerCase().includes(q));
   }, [records, searchQuery]);
 
   return (

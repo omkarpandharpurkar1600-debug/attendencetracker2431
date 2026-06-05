@@ -6,6 +6,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import AdminPanel from './pages/AdminPanel';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function ProtectedRoute({ role, children }) {
   const { currentUser } = useApp();
@@ -49,6 +50,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <AppProvider>
       <Toaster
         position="top-right"
@@ -63,5 +65,6 @@ export default function App() {
       />
       <AppRoutes />
     </AppProvider>
+    </ErrorBoundary>
   );
 }

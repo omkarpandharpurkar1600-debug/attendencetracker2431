@@ -1,8 +1,7 @@
 import React from 'react';
 import { Users, Radio, CalendarCheck, Database } from 'lucide-react';
-import { DEMO_STUDENTS } from '../../data/students';
 
-export default function DashboardTab({ activeSessions, todayAttendance, attendance }) {
+export default function DashboardTab({ activeSessions, todayAttendance, attendance, totalStudents }) {
   return (
     <div className="stats-grid">
       <div className="stat-card glass-card">
@@ -35,7 +34,7 @@ export default function DashboardTab({ activeSessions, todayAttendance, attendan
             Total Students
           </span>
           <span className="stat-value" style={{ fontSize: '1.8rem', fontWeight: 700 }}>
-            {DEMO_STUDENTS.length}
+            {totalStudents || 120}
           </span>
         </div>
       </div>

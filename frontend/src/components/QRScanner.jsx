@@ -4,6 +4,7 @@ import { Camera, X, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
 import { getCurrentPosition } from '../utils/geo';
+import { INITIAL_SCAN_RADIUS_METERS } from '../data/students';
 
 export default function QRScanner({ onSuccess }) {
   const { markAttendance, currentUser } = useApp();
@@ -21,10 +22,10 @@ export default function QRScanner({ onSuccess }) {
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .then(() => scannerRef.current.clear())
-          .catch(() => {});
+        try {
+          // If scanning, stop it safely. We don't need clear() because React unmounts the DOM node.
+          scannerRef.current.stop().catch(() => {});
+        } catch (err) {}
       }
     };
   }, []);
@@ -100,7 +101,7 @@ export default function QRScanner({ onSuccess }) {
     }
 
     // Mark attendance
-    const attendanceResult = markAttendance(decodedText, {
+    const attendanceResult = await markAttendance(decodedText, {
       lat: position.lat,
       lng: position.lng,
     });
@@ -191,8 +192,10 @@ export default function QRScanner({ onSuccess }) {
               </span>
             </div>
             <div className="detail-row">
-              <span className="detail-label">Distance</span>
-              <span className="detail-value">{Math.round(result.record.currentDistance ?? 0)}m</span>
+              <span className="detail-label">Range</span>
+              <span className={`badge ${(result.record.currentDistance ?? 0) <= INITIAL_SCAN_RADIUS_METERS ? 'badge-success' : 'badge-error'}`}>
+                {(result.record.currentDistance ?? 0) <= INITIAL_SCAN_RADIUS_METERS ? 'Within Range' : 'Out of Range'}
+              </span>
             </div>
           </div>
           <button

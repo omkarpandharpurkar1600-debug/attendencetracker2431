@@ -46,7 +46,7 @@ const blueIcon = new L.Icon({
 });
 
 export default function LiveMonitor({ activeSessionId }) {
-  const { attendance, simulateMovement } = useApp();
+  const { attendance } = useApp();
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [now, setNow] = useState(Date.now());
   const [simMode, setSimMode] = useState(false);
@@ -71,14 +71,44 @@ export default function LiveMonitor({ activeSessionId }) {
     }
   }, [selectedRecord, selectedStudentId]);
 
-  const locationLogs = selectedRecord 
-    ? storage.getLocationLogs().filter(l => l.attendanceId === selectedRecord.id).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    : [];
+  const [locationLogs, setLocationLogs] = useState([]);
 
-  const handleSimulate = (latOffset, lngOffset) => {
+  useEffect(() => {
     if (selectedRecord) {
-      simulateMovement(selectedRecord.id, latOffset, lngOffset);
+      storage.getLogsForAttendance(selectedRecord.id).then((logs) => {
+        setLocationLogs(logs);
+      });
+    } else {
+      setLocationLogs([]);
     }
+  }, [selectedRecord]);
+
+  const handleSimulate = async (latOffset, lngOffset) => {
+    if (!selectedRecord) return;
+    const newLat = (selectedRecord.currentLat || selectedRecord.originLat || selectedRecord.lat) + latOffset;
+    const newLng = (selectedRecord.currentLng || selectedRecord.originLng || selectedRecord.lng) + lngOffset;
+    const newDistance = Math.round(
+      Math.sqrt(Math.pow((newLat - (selectedRecord.originLat || selectedRecord.lat)) * 111320, 2) + Math.pow((newLng - (selectedRecord.originLng || selectedRecord.lng)) * 111320 * Math.cos((selectedRecord.originLat || selectedRecord.lat) * Math.PI / 180), 2))
+    );
+    const newStatus = newDistance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
+    await storage.updateAttendance(selectedRecord.id, {
+      currentLat: newLat,
+      currentLng: newLng,
+      currentDistance: newDistance,
+      status: newStatus,
+      riskLevel: newStatus === 'Absent' ? 'High' : 'Low',
+    });
+    await storage.addLocationLog({
+      studentId: selectedRecord.studentId,
+      sessionId: selectedRecord.sessionId,
+      attendanceId: selectedRecord.id,
+      lat: newLat,
+      lng: newLng,
+      distance: newDistance,
+      status: newStatus,
+      timestamp: new Date().toISOString(),
+      event: `Simulated movement (${newStatus === 'Present' ? 'Within Range' : 'Out of Range'})`,
+    });
   };
 
   const getProgress = (record) => {
@@ -183,7 +213,7 @@ export default function LiveMonitor({ activeSessionId }) {
               </MapContainer>
               <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 400, background: 'var(--bg-card)', padding: '8px 16px', borderRadius: 20, boxShadow: '0 4px 12px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', fontWeight: 600 }}>
                 <MapPin size={16} style={{ color: selectedRecord.status === 'Present' ? 'var(--success)' : 'var(--error)' }} />
-                Distance: {Math.round(selectedRecord.currentDistance)}m
+                {selectedRecord.status === 'Present' ? 'Within Range' : 'Out of Range'}
               </div>
             </div>
           )}
@@ -192,7 +222,7 @@ export default function LiveMonitor({ activeSessionId }) {
             <h3>Students in Session</h3>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', cursor: 'pointer', background: simMode ? 'rgba(124, 58, 237, 0.15)' : 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 20 }}>
               <input type="checkbox" checked={simMode} onChange={e => setSimMode(e.target.checked)} style={{ margin: 0 }} />
-              Demo Simulation Mode
+              Test Simulation Mode
             </label>
           </div>
 
@@ -218,8 +248,8 @@ export default function LiveMonitor({ activeSessionId }) {
                     </span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Distance</div>
-                    <div style={{ fontWeight: 600 }}>{Math.round(record.currentDistance)}m</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Range</div>
+                    <div style={{ fontWeight: 600 }}>{record.status === 'Present' ? 'Within Range' : 'Out of Range'}</div>
                   </div>
                 </div>
 
@@ -282,7 +312,7 @@ export default function LiveMonitor({ activeSessionId }) {
                           {log.event}
                         </span>
                       ) : (
-                        log.distance === 0 ? 'Attendance Marked' : `Distance: ${Math.round(log.distance)}m`
+                        log.distance === 0 ? 'Attendance Marked' : `Location Updated (${log.status === 'Present' ? 'Within Range' : 'Out of Range'})`
                       )}
                     </div>
                     {i === 0 && log.status === 'Absent' && (

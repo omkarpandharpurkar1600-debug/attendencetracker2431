@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldAlert } from 'lucide-react';
-import { DEMO_STUDENTS } from '../../data/students';
 import storage from '../../utils/storage';
 
 export default function AuditLogsTab() {
-  const logs = storage.getLocationLogs().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    storage.getLocationLogs().then((data) => {
+      setLogs(data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+    });
+  }, []);
 
   return (
     <>
@@ -24,7 +29,6 @@ export default function AuditLogsTab() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {logs.map((log, i) => {
-              const stu = DEMO_STUDENTS.find((s) => s.id === log.studentId);
               const isAlert = log.event?.includes('Disabled') || log.event?.includes('Interrupted');
               return (
                 <div
@@ -41,10 +45,10 @@ export default function AuditLogsTab() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <strong style={{ display: 'block', marginBottom: 4 }}>
-                      {stu ? stu.name : log.studentId}
+                      {log.studentId}
                     </strong>
                     <span style={{ color: isAlert ? 'var(--error)' : 'var(--text-primary)' }}>
-                      {log.event || `Location Updated (Distance: ${Math.round(log.distance)}m)`}
+                      {log.event || `Location Updated (${log.status === 'Present' ? 'Within Range' : 'Out of Range'})`}
                     </span>
                   </div>
                   <div>

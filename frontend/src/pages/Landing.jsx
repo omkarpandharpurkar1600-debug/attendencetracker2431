@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, MapPin, QrCode, Clock, Navigation, 
-  Smartphone, Eye, Users, ChevronDown, CheckCircle, 
+  Smartphone, Eye, Users, CheckCircle, 
   Zap, Database, Server, Smartphone as Phone, Cloud, Brain
 } from 'lucide-react';
 
@@ -24,12 +24,12 @@ export default function Landing() {
           </div>
           GeoSecure
         </div>
-        <button className="btn-primary" onClick={handleLaunch}>Launch Demo</button>
+        <button className="btn-primary" onClick={handleLaunch}>Launch App</button>
       </nav>
 
       {/* Hero Section */}
       <header style={{ padding: '120px 24px', textAlign: 'center', maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
-        <div className="badge badge-active" style={{ fontSize: '0.85rem', padding: '6px 16px', borderRadius: 20 }}>First Year Project Demonstration</div>
+        <div className="badge badge-active" style={{ fontSize: '0.85rem', padding: '6px 16px', borderRadius: 20 }}>First Year Project</div>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.1, margin: 0, background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
           QR-Based Smart Attendance<br/>with Location Validation
         </h1>
@@ -38,7 +38,7 @@ export default function Landing() {
         </p>
         <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
           <button className="btn-primary" onClick={handleLaunch} style={{ padding: '12px 32px', fontSize: '1.1rem' }}>
-            Start Interactive Demo
+            Get Started
           </button>
           <a href="#workflow" className="btn-secondary" style={{ padding: '12px 32px', fontSize: '1.1rem', textDecoration: 'none' }}>
             View Workflow
@@ -110,7 +110,7 @@ export default function Landing() {
             <div className="glass-card">
               <Database size={32} color="var(--accent-primary)" style={{ marginBottom: 16 }} />
               <h3>State & Storage</h3>
-              <p style={{ color: 'var(--text-secondary)' }}>Utilizes browser <strong>LocalStorage</strong> to simulate database persistence for demonstration purposes, allowing offline-capable demo scenarios.</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Powered by <strong>Supabase</strong> (PostgreSQL) for real-time cloud database persistence, enabling multi-device access and live data synchronization.</p>
             </div>
             <div className="glass-card">
               <MapPin size={32} color="var(--accent-primary)" style={{ marginBottom: 16 }} />
@@ -149,7 +149,7 @@ export default function Landing() {
           Developed By
         </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px 48px', marginBottom: 32 }}>
-          {['Omkar (2GI25ME056)', 'Bhavana (2GI25CS045)', 'Yash (2GI25CV108)', 'Kartik (2GI25EC056)'].map((member, i) => (
+          {['Omkar (2XI25ME056)', 'Bhavana (2XI25CS045)', 'Yash (2XI25CV108)', 'Kartik (2XI25EC056)'].map((member, i) => (
             <div key={i} style={{ fontWeight: 600, fontSize: '1.1rem' }}>{member}</div>
           ))}
         </div>

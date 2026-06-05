@@ -35,7 +35,7 @@ export default function AttendanceTable({ records, isAdmin = false }) {
             <th>Time</th>
             {isAdmin && <th>Risk Level</th>}
             <th>Status</th>
-            <th>Distance (Origin)</th>
+            <th>Range</th>
             <th>Monitoring</th>
             {isAdmin && <th>Device ID</th>}
           </tr>
@@ -64,7 +64,11 @@ export default function AttendanceTable({ records, isAdmin = false }) {
                   {record.status}
                 </span>
               </td>
-              <td>{(record.currentDistance ?? record.distance) != null ? `${Math.round(record.currentDistance ?? record.distance)}m` : '—'}</td>
+              <td>
+                <span className={`badge ${record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
+                  {record.status === 'Present' ? 'Within Range' : 'Out of Range'}
+                </span>
+              </td>
               <td>
                 <span className={`badge ${
                   record.monitoringStatus === 'Monitoring' ? 'badge-warning' :

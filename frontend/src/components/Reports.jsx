@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, Printer, PieChart, BarChart2, Activity, Users, ShieldAlert, CheckCircle } from 'lucide-react';
 import storage from '../utils/storage';
 
 export default function Reports() {
-  const allAttendance = storage.getAttendance();
+  const [allAttendance, setAllAttendance] = useState([]);
+
+  useEffect(() => {
+    storage.getAttendance().then(setAllAttendance).catch(() => {});
+  }, []);
   
   const totalRecords = allAttendance.length;
   const present = allAttendance.filter(a => a.status === 'Present').length;
@@ -15,7 +19,7 @@ export default function Reports() {
   const riskHigh = allAttendance.filter(a => a.riskLevel === 'High').length;
 
   const downloadCSV = () => {
-    const headers = ['Student Name', 'Roll Number', 'Session', 'Scan Time', 'Status', 'Risk Level', 'Monitoring Status', 'Distance (m)', 'Device ID'];
+    const headers = ['Student Name', 'Roll Number', 'Session', 'Scan Time', 'Status', 'Risk Level', 'Monitoring Status', 'Range', 'Device ID'];
     const rows = allAttendance.map(r => [
       r.studentName,
       r.rollNumber,
@@ -24,7 +28,7 @@ export default function Reports() {
       r.status,
       r.riskLevel || 'Low',
       r.monitoringStatus || 'Completed',
-      Math.round(r.currentDistance ?? r.distance),
+      r.status === 'Present' ? 'Within Range' : 'Out of Range',
       r.deviceId || 'Unknown'
     ]);
     
@@ -129,7 +133,7 @@ export default function Reports() {
                   <th>Student</th>
                   <th>Status</th>
                   <th>Risk Level</th>
-                  <th>Distance</th>
+                  <th>Range</th>
                 </tr>
               </thead>
               <tbody>
@@ -144,7 +148,11 @@ export default function Reports() {
                         {r.riskLevel || 'Low'}
                       </span>
                     </td>
-                    <td>{Math.round(r.currentDistance ?? r.distance)}m</td>
+                    <td>
+                      <span className={`badge ${r.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
+                        {r.status === 'Present' ? 'Within Range' : 'Out of Range'}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Radio, Database, Plus, QrCode, Trash2, Search, MapPin, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
-import { DEMO_STUDENTS } from '../data/students';
 import QRGenerator from '../components/QRGenerator';
 import LiveMonitor from '../components/LiveMonitor';
 import Reports from '../components/Reports';
@@ -23,12 +22,18 @@ export default function AdminPanel() {
   const [locationStatus, setLocationStatus] = useState('');
   const [capturedLocation, setCapturedLocation] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [studentsList, setStudentsList] = useState([]);
 
   useEffect(() => {
     refreshData();
+    storage.getStudentsList().then(setStudentsList);
   }, []);
 
-  const now = new Date();
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 5000);
+    return () => clearInterval(timer);
+  }, []);
   const activeSessions = sessions.filter((s) => {
     const start = new Date(s.startTime);
     const end = new Date(s.endTime);
@@ -58,8 +63,8 @@ export default function AdminPanel() {
       await createSession({
         name: sessionForm.name,
         className: sessionForm.className,
-        startTime: sessionForm.startTime,
-        endTime: sessionForm.endTime,
+        startTime: new Date(sessionForm.startTime).toISOString(),
+        endTime: new Date(sessionForm.endTime).toISOString(),
         lat: pos.lat,
         lng: pos.lng,
       });
@@ -69,15 +74,17 @@ export default function AdminPanel() {
       setLocationStatus('');
       setCapturedLocation(null);
       toast.success('Session created successfully!');
+      await refreshData();
     } catch (err) {
       setLocationStatus('');
       toast.error('Failed to get location or create session');
     }
   };
 
-  const handleDeleteSession = (sessionId) => {
-    storage.deleteSession(sessionId);
-    refreshData();
+  const handleDeleteSession = async (sessionId) => {
+    if (!window.confirm('Delete this session? Associated attendance records will also be deleted.')) return;
+    await storage.deleteSession(sessionId);
+    await refreshData();
     toast.success('Session deleted');
   };
 
@@ -114,52 +121,56 @@ export default function AdminPanel() {
 
   const handleGenerateSamples = async () => {
     setIsGenerating(true);
-    // 1. Create a dummy session
-    const res = await createSession({
-      name: 'Computer Networks - CN401',
-      className: 'CSE 4th Year',
-      duration: 60,
-    });
-    
-    if (res.success) {
-      const sessionId = res.session.id;
-      // 2. Generate random attendance for some demo students
-      DEMO_STUDENTS.forEach((student, index) => {
-        const statuses = ['Present', 'Absent'];
-        const monitoringStatuses = ['Monitoring', 'Completed', 'Suspicious', 'Location Disabled'];
-        const riskLevels = ['Low', 'Medium', 'High'];
-        
+    try {
+      // 1. Create a dummy session
+      const now = new Date();
+      const endTime = new Date(now.getTime() + 3600000);
+      const session = await createSession({
+        name: 'Computer Networks - CN401',
+        className: 'CSE 4th Year',
+        startTime: now.toISOString(),
+        endTime: endTime.toISOString(),
+        lat: 15.8497,
+        lng: 74.4977,
+      });
+
+      const sessionId = session.id;
+      // 2. Generate random attendance for some students
+      const sampleStudents = studentsList.slice(0, 10);
+      for (const student of sampleStudents) {
         const isPresent = Math.random() > 0.4;
         const status = isPresent ? 'Present' : 'Absent';
-        const riskLevel = isPresent ? 'Low' : riskLevels[Math.floor(Math.random() * riskLevels.length)];
-        
-        storage.addAttendance({
-          id: Date.now().toString(36) + Math.random().toString(36).substr(2) + index,
+        await storage.addAttendance({
           studentId: student.id,
           studentName: student.name,
           rollNumber: student.rollNumber,
           sessionId,
-          sessionName: 'Computer Networks - CN401',
           scanTime: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+          lat: 15.8497 + (Math.random() - 0.5) * 0.001,
+          lng: 74.4977 + (Math.random() - 0.5) * 0.001,
+          distance: isPresent ? Math.random() * 15 : 25 + Math.random() * 50,
           status,
-          monitoringStatus: monitoringStatuses[Math.floor(Math.random() * monitoringStatuses.length)],
-          monitoringEndTime: Date.now() + 120000,
-          originLat: 15.8497,
-          originLng: 74.4977,
-          currentDistance: isPresent ? Math.random() * 15 : 25 + Math.random() * 50,
           deviceId: 'DEV-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-          riskLevel
         });
-      });
-      toast.success('Sample demo data injected successfully!');
-      setTimeout(() => window.location.reload(), 1000);
+      }
+      toast.success('Sample data generated successfully!');
+      await refreshData();
+    } catch (err) {
+      toast.error('Failed to generate sample data.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const handleResetDemo = () => {
-    storage.clearAll();
-    toast.success('All demo data cleared.');
-    setTimeout(() => window.location.reload(), 1000);
+  const handleResetData = async () => {
+    if (!window.confirm('Are you sure? This will permanently delete ALL sessions, attendance records, and location logs.')) return;
+    try {
+      await storage.resetAllData();
+      toast.success('All data cleared.');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      toast.error('Failed to clear data: ' + err.message);
+    }
   };
 
   return (
@@ -168,7 +179,7 @@ export default function AdminPanel() {
         <span className="navbar-brand">GeoSecure</span>
         <div className="navbar-right">
           <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem' }} onClick={() => setShowDemoModal(true)}>
-            Demo Controls
+            Admin Tools
           </button>
           <span>Admin Panel</span>
           <button className="btn-icon" onClick={logout}>
@@ -209,7 +220,8 @@ export default function AdminPanel() {
           <DashboardTab 
             activeSessions={activeSessions} 
             todayAttendance={todayAttendance} 
-            attendance={attendance} 
+            attendance={attendance}
+            totalStudents={studentsList.length}
           />
         )}
 
@@ -363,15 +375,15 @@ export default function AdminPanel() {
       {showDemoModal && (
         <div className="modal-overlay">
           <div className="modal-content glass-card fade-in" style={{ maxWidth: 400 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 16 }}>Project Demo Controls</h3>
+            <h3 style={{ marginTop: 0, marginBottom: 16 }}>Admin Tools</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 24 }}>
-              Use these tools during your first-year presentation to quickly reset state or generate mock data to showcase the analytics.
+              Use these tools to generate sample data for testing or reset the database.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <button className="btn-primary" onClick={handleGenerateSamples} disabled={isGenerating}>
                 {isGenerating ? 'Generating...' : 'Generate Sample Data & Charts'}
               </button>
-              <button className="btn-danger" onClick={handleResetDemo}>
+              <button className="btn-danger" onClick={handleResetData}>
                 Factory Reset (Clear All Data)
               </button>
               <button className="btn-secondary" onClick={() => setShowDemoModal(false)}>

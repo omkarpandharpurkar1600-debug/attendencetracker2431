@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DEMO_STUDENTS, GEOFENCE_RADIUS_METERS, MONITORING_DURATION_MS } from '../data/students';
+import { GEOFENCE_RADIUS_METERS, INITIAL_SCAN_RADIUS_METERS, MONITORING_DURATION_MS } from '../data/students';
 import * as storage from '../utils/storage';
 import { calculateDistance } from '../utils/geo';
+import supabase from '../utils/supabaseClient';
 
 const AppContext = createContext(null);
 
@@ -10,33 +11,69 @@ export function AppProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const refreshData = useCallback(() => {
-    setSessions(storage.getSessions());
-    setAttendance(storage.getAttendance());
+  const refreshData = useCallback(async () => {
+    try {
+      const [sessionsData, attendanceData] = await Promise.all([
+        storage.getSessions(),
+        storage.getAttendance(),
+      ]);
+
+      // Auto-complete any monitoring records whose timer has expired
+      const now = Date.now();
+      const staleRecords = attendanceData.filter(
+        (a) => a.monitoringStatus === 'Monitoring' && a.monitoringEndTime && now > a.monitoringEndTime
+      );
+      for (const record of staleRecords) {
+        await storage.updateAttendance(record.id, { monitoringStatus: 'Completed' });
+        record.monitoringStatus = 'Completed';
+      }
+
+      setSessions(sessionsData);
+      setAttendance(attendanceData);
+    } catch (err) {
+      console.error('Failed to refresh data:', err);
+    }
   }, []);
 
   useEffect(() => {
-    const savedUser = storage.getCurrentUser();
-    if (savedUser) {
-      setCurrentUser(savedUser);
+    async function init() {
+      const savedUser = storage.getCurrentUser();
+      if (savedUser) {
+        // Verify the Supabase auth session is still valid
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setCurrentUser(savedUser);
+        } else {
+          // JWT expired — clear stale local data
+          storage.clearCurrentUser();
+        }
+      }
+      await refreshData();
+      setLoading(false);
     }
-    refreshData();
+    init();
   }, [refreshData]);
 
-  const login = useCallback((studentId) => {
-    let user;
-    if (studentId === 'admin') {
-      user = { id: 'admin', name: 'Admin', role: 'admin' };
-    } else {
-      const student = DEMO_STUDENTS.find((s) => s.id === studentId);
-      if (!student) return;
-      user = { ...student, role: 'student' };
+  // Auto-refresh every 10 seconds so admin sees live updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [refreshData]);
+
+  const login = useCallback(async (username, password) => {
+    const result = await storage.login(username, password);
+    if (result.success) {
+      setCurrentUser(result.user);
+      storage.setCurrentUser(result.user);
+      navigate(result.user.role === 'admin' ? '/admin' : '/student');
+      return { success: true };
     }
-    setCurrentUser(user);
-    storage.setCurrentUser(user);
-    navigate(user.role === 'admin' ? '/admin' : '/student');
+    return { success: false, message: result.message || 'Login failed.' };
   }, [navigate]);
 
   const logout = useCallback(() => {
@@ -45,30 +82,27 @@ export function AppProvider({ children }) {
     navigate('/login');
   }, [navigate]);
 
-  const createSession = useCallback(({ name, className, startTime, endTime, lat, lng }) => {
-    const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+  const createSession = useCallback(async ({ name, className, startTime, endTime, lat, lng }) => {
     const qrToken = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
-    const qrData = JSON.stringify({ sessionId: id, qrToken, lat, lng });
 
-    const session = {
-      id,
+    const session = await storage.addSession({
       name,
       className,
       startTime,
       endTime,
       lat,
       lng,
+      createdBy: currentUser?.id || 'admin',
       qrToken,
-      qrData,
-      createdAt: new Date().toISOString(),
-    };
+    });
 
-    storage.addSession(session);
-    refreshData();
+    session.qrData = JSON.stringify({ sessionId: session.id, qrToken, lat, lng });
+
+    await refreshData();
     return session;
-  }, [refreshData]);
+  }, [currentUser, refreshData]);
 
-  const markAttendance = useCallback((qrData, studentLocation) => {
+  const markAttendance = useCallback(async (qrData, studentLocation) => {
     let parsed;
     try {
       parsed = JSON.parse(qrData);
@@ -82,14 +116,11 @@ export function AppProvider({ children }) {
       return { success: false, message: 'QR Code has expired. Please scan the new one.' };
     }
 
-    const currentSessions = storage.getSessions();
+    // Fetch fresh sessions from backend
+    const currentSessions = await storage.getSessions();
     const session = currentSessions.find((s) => s.id === sessionId);
     if (!session) {
       return { success: false, message: 'Session not found.' };
-    }
-
-    if (session.qrToken !== qrToken) {
-      return { success: false, message: 'Invalid QR token.' };
     }
 
     const now = new Date();
@@ -99,7 +130,8 @@ export function AppProvider({ children }) {
       return { success: false, message: 'Session is not currently active.' };
     }
 
-    if (storage.hasMarkedAttendance(currentUser.id, sessionId)) {
+    const alreadyMarked = await storage.hasMarkedAttendance(currentUser.studentId, sessionId);
+    if (alreadyMarked) {
       return { success: false, message: 'Attendance Already Recorded' };
     }
 
@@ -110,97 +142,62 @@ export function AppProvider({ children }) {
       lng
     );
 
-    const status = distance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
+    // Initial Teacher-to-Student scan logic
+    const status = distance <= INITIAL_SCAN_RADIUS_METERS ? 'Present' : 'Absent';
 
-    const record = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      studentId: currentUser.id,
+    const record = await storage.addAttendance({
+      studentId: currentUser.studentId,
       studentName: currentUser.name,
       rollNumber: currentUser.rollNumber,
       sessionId,
       sessionName: session.name,
       scanTime: new Date().toISOString(),
+      lat: studentLocation.lat,
+      lng: studentLocation.lng,
+      distance,
       status,
+      deviceId: storage.getDeviceId(),
+      qrToken,
       monitoringStatus: 'Monitoring',
-      monitoringEndTime: Date.now() + MONITORING_DURATION_MS,
+      monitoringEndTime: new Date(Date.now() + MONITORING_DURATION_MS).toISOString(),
       originLat: studentLocation.lat,
       originLng: studentLocation.lng,
+      currentDistance: distance,
       currentLat: studentLocation.lat,
       currentLng: studentLocation.lng,
-      currentDistance: distance,
-      simulationActive: false,
-      deviceId: storage.getDeviceId(),
-      browserInfo: navigator.userAgent,
-      riskLevel: 'Low',
-    };
+      riskLevel: distance <= GEOFENCE_RADIUS_METERS ? 'Low' : 'High',
+    });
 
-    storage.addAttendance(record);
-    
-    storage.addLocationLog({
-      studentId: currentUser.id,
+    await storage.addLocationLog({
+      studentId: currentUser.studentId,
       sessionId,
       attendanceId: record.id,
       lat: studentLocation.lat,
       lng: studentLocation.lng,
       distance,
-      status,
-      timestamp: record.scanTime,
-      event: 'Attendance Marked',
+      timestamp: new Date().toISOString(),
     });
-    
-    refreshData();
+
+    await refreshData();
     return { success: true, record };
   }, [currentUser, refreshData]);
 
-  const updateAttendanceStatus = useCallback((attendanceId, newStatus) => {
-    storage.updateAttendance(attendanceId, newStatus);
-    refreshData();
-  }, [refreshData]);
-
-  const simulateMovement = useCallback((attendanceId, latOffset, lngOffset) => {
-    const record = storage.getAttendanceById(attendanceId);
-    if (!record) return;
-
-    const newLat = (record.currentLat || record.originLat) + latOffset;
-    const newLng = (record.currentLng || record.originLng) + lngOffset;
-
-    const distance = calculateDistance(newLat, newLng, record.originLat, record.originLng);
-    const newStatus = distance <= GEOFENCE_RADIUS_METERS ? 'Present' : 'Absent';
-
-    storage.addLocationLog({
-      studentId: record.studentId,
-      sessionId: record.sessionId,
-      attendanceId: record.id,
-      lat: newLat,
-      lng: newLng,
-      distance,
-      status: newStatus,
-      timestamp: new Date().toISOString(),
-      isSimulation: true,
-    });
-
-    const updates = {
-      currentLat: newLat,
-      currentLng: newLng,
-      currentDistance: distance,
-      status: newStatus,
-      simulationActive: true,
-    };
-    storage.updateAttendance(attendanceId, updates);
-    refreshData();
+  const updateAttendanceStatus = useCallback(async (attendanceId, updates) => {
+    await storage.updateAttendance(attendanceId, updates);
+    await refreshData();
   }, [refreshData]);
 
   const value = {
     currentUser,
     sessions,
     attendance,
+    loading,
     login,
     logout,
     refreshData,
     createSession,
     markAttendance,
     updateAttendanceStatus,
-    simulateMovement,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
