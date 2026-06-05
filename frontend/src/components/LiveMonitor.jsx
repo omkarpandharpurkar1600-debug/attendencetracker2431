@@ -179,11 +179,11 @@ export default function LiveMonitor({ activeSessionId }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
+      <div className="monitor-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
         {/* Main View: Map + Students */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {selectedRecord && (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', height: 400, position: 'relative' }}>
+            <div className="glass-card monitor-map" style={{ padding: 0, overflow: 'hidden', height: 400, position: 'relative' }}>
               <MapContainer 
                 center={[selectedRecord.originLat, selectedRecord.originLng]} 
                 zoom={18} 
@@ -205,7 +205,7 @@ export default function LiveMonitor({ activeSessionId }) {
                       [selectedRecord.originLat, selectedRecord.originLng],
                       [selectedRecord.currentLat, selectedRecord.currentLng]
                     ]}
-                    color={selectedRecord.status === 'Present' ? '#22c55e' : '#ef4444'}
+                    color={selectedRecord.status === 'Present' ? '#FFD600' : '#ef4444'}
                     dashArray="5, 10"
                     weight={3}
                   />
@@ -220,13 +220,13 @@ export default function LiveMonitor({ activeSessionId }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>Students in Session</h3>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', cursor: 'pointer', background: simMode ? 'rgba(124, 58, 237, 0.15)' : 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 20 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', cursor: 'pointer', background: simMode ? 'rgba(247, 147, 26, 0.12)' : 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 20 }}>
               <input type="checkbox" checked={simMode} onChange={e => setSimMode(e.target.checked)} style={{ margin: 0 }} />
               Test Simulation Mode
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <div className="student-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {sessionAttendance.map(record => (
               <div 
                 key={record.id} 

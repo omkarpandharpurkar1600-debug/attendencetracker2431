@@ -33,6 +33,7 @@ export default function AuditLogsTab() {
               return (
                 <div
                   key={log.id || i}
+                  className="audit-log-entry"
                   style={{
                     display: 'flex',
                     gap: 16,
@@ -40,7 +41,7 @@ export default function AuditLogsTab() {
                     paddingBottom: 16,
                   }}
                 >
-                  <div style={{ width: 120, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <div className="audit-timestamp" style={{ width: 120, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                     {new Date(log.timestamp).toLocaleString()}
                   </div>
                   <div style={{ flex: 1 }}>

@@ -147,6 +147,7 @@ export default function QRGenerator({ session, onClose }) {
           }}
         >
           <div
+            className="qr-fullscreen-inner"
             style={{
               background: '#ffffff',
               borderRadius: 24,

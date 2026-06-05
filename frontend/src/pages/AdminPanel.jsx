@@ -227,7 +227,7 @@ export default function AdminPanel() {
 
         {activeTab === 'sessions' && (
           <>
-            <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+            <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
               <h2 style={{ margin: 0 }}>Sessions</h2>
               <button className="btn-primary" onClick={() => setShowCreateForm(!showCreateForm)}>
                 <Plus size={16} /> Create Session
@@ -315,7 +315,7 @@ export default function AdminPanel() {
                         {formatDate(session.startTime)} · {formatTimeRange(session.startTime, session.endTime)}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <button className="btn-secondary" onClick={() => setShowQR(session)}>
                         <QrCode size={16} /> Show QR
                       </button>

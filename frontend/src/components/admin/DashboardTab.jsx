@@ -8,8 +8,8 @@ export default function DashboardTab({ activeSessions, todayAttendance, attendan
         <div
           className="stat-icon"
           style={{
-            background: 'rgba(59,130,246,0.15)',
-            color: '#3b82f6',
+            background: 'rgba(247,147,26,0.12)',
+            color: '#F7931A',
             width: 40,
             height: 40,
             borderRadius: 12,
@@ -43,8 +43,8 @@ export default function DashboardTab({ activeSessions, todayAttendance, attendan
         <div
           className="stat-icon"
           style={{
-            background: 'rgba(34,197,94,0.15)',
-            color: '#22c55e',
+            background: 'rgba(255,214,0,0.12)',
+            color: '#FFD600',
             width: 40,
             height: 40,
             borderRadius: 12,
@@ -78,8 +78,8 @@ export default function DashboardTab({ activeSessions, todayAttendance, attendan
         <div
           className="stat-icon"
           style={{
-            background: 'rgba(251,146,60,0.15)',
-            color: '#fb923c',
+            background: 'rgba(247,147,26,0.12)',
+            color: '#F7931A',
             width: 40,
             height: 40,
             borderRadius: 12,
@@ -113,8 +113,8 @@ export default function DashboardTab({ activeSessions, todayAttendance, attendan
         <div
           className="stat-icon"
           style={{
-            background: 'rgba(168,85,247,0.15)',
-            color: '#a855f7',
+            background: 'rgba(234,88,12,0.12)',
+            color: '#EA580C',
             width: 40,
             height: 40,
             borderRadius: 12,

@@ -68,18 +68,18 @@ export default function StudentDashboard() {
             </div>
 
             {activeAttendance && (
-              <div className="glass-card" style={{ marginBottom: 24, border: '1px solid var(--warning)', background: 'rgba(245, 158, 11, 0.05)' }}>
+              <div className="glass-card" style={{ marginBottom: 24, border: '1px solid rgba(247,147,26,0.5)', background: 'rgba(247,147,26,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                   <div>
-                    <h3 style={{ margin: '0 0 4px', color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span className="tracking-dot" style={{ background: 'var(--warning)', width: 10, height: 10, borderRadius: '50%', animation: 'pulse 1.5s infinite' }} />
+                    <h3 style={{ margin: '0 0 4px', color: '#F7931A', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span className="tracking-dot" style={{ background: '#F7931A', width: 10, height: 10, borderRadius: '50%', animation: 'pulse 1.5s infinite' }} />
                       Active Monitoring
                     </h3>
                     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                       Stay within range of your scan location.
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: 24, textAlign: 'right' }}>
+                  <div className="monitoring-stats" style={{ display: 'flex', gap: 24, textAlign: 'right' }}>
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Range</div>
                       <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>
@@ -109,7 +109,7 @@ export default function StudentDashboard() {
               <div className="stat-card glass-card">
                 <div
                   className="stat-icon"
-                  style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ background: 'rgba(247,147,26,0.12)', color: '#F7931A', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Calendar size={20} />
                 </div>
@@ -122,7 +122,7 @@ export default function StudentDashboard() {
               <div className="stat-card glass-card">
                 <div
                   className="stat-icon"
-                  style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ background: 'rgba(255,214,0,0.12)', color: '#FFD600', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <CheckCircle size={20} />
                 </div>
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
               <div className="stat-card glass-card">
                 <div
                   className="stat-icon"
-                  style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ background: 'rgba(234,88,12,0.12)', color: '#EA580C', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <BarChart3 size={20} />
                 </div>

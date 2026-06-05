@@ -50,14 +50,14 @@ export default function Reports() {
   return (
     <div className="reports-container fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24 }}>
       
-      <div className="toolbar no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="toolbar no-print reports-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
             <PieChart size={24} color="var(--accent-primary)" /> Reports & Analytics
           </h2>
           <p style={{ color: 'var(--text-secondary)', marginTop: 8 }}>Overview of all historical attendance data.</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="reports-actions" style={{ display: 'flex', gap: 12 }}>
           <button className="btn-secondary" onClick={handlePrint}><Printer size={16} /> Print Report</button>
           <button className="btn-primary" onClick={downloadCSV}><Download size={16} /> Download CSV</button>
         </div>
@@ -94,7 +94,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 24 }}>
         
         {/* Simple Risk Chart */}
         <div className="glass-card">
