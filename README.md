@@ -1,130 +1,108 @@
-# GeoSecure Attendance
+# 📍 GeoSecure Attendance
 
-A lightweight, web-based QR attendance management system with GPS tracking — built as a college project demo.
+**A GPS-Based QR Attendance Management System**
 
-## Features
+GeoSecure is a next-generation attendance tracking system designed to completely eliminate proxy attendance. It combines dynamic, time-sensitive QR codes with continuous live GPS geofencing to ensure students are physically present in the classroom during the entire session. 
 
-- **QR-Based Attendance** — Admin generates QR codes for sessions, students scan to mark attendance
-- **GPS Geofencing** — Tracks student location every 15 seconds; marks absent if they leave the zone
-- **No Backend Required** — Everything runs in the browser using localStorage
-- **Dark Premium UI** — Glassmorphism, gradients, micro-animations
-- **Mobile-Friendly** — Responsive design works on phones for scanning
+Built with a premium "Bitcoin DeFi" aesthetic, GeoSecure offers a dark-void theme, mobile-first responsive design, and real-time monitoring capabilities for administrators.
 
-## Tech Stack
+---
 
-| Component | Technology |
-|-----------|-----------|
-| Framework | React 18 (Vite) |
-| Styling | Vanilla CSS (dark mode) |
-| QR Scanning | html5-qrcode |
-| QR Generation | qrcode.react |
-| GPS | Browser Geolocation API |
-| Storage | Browser localStorage |
-| Icons | Lucide React |
-| Notifications | react-hot-toast |
+## ✨ Key Features
 
-## Quick Start
+- **🛡️ Anti-Proxy Dynamic QR Codes:** QR codes are generated with embedded, encrypted timestamps that refresh automatically. This prevents students from screenshotting and sharing the QR code with absent peers.
+- **🌍 GPS Geofencing Validation:** Upon scanning the QR code, the student's geolocation is captured. If they are not within a 200-meter radius of the classroom (the "Origin Point"), they are marked absent.
+- **📡 Continuous Live Monitoring:** Attendance isn't just a one-time scan. GeoSecure actively monitors the student's location throughout the session. If a student leaves the geofence, their risk level increases, and their status is flagged.
+- **🗺️ Real-Time Admin Map:** Administrators have access to a live radar map (powered by Leaflet) showing the real-time positions of all scanned students, color-coded by their current presence status.
+- **📊 Comprehensive Reporting & Analytics:** Generate detailed CSV reports, view attendance history, and analyze session statistics through an intuitive admin dashboard.
+- **📱 Mobile-First Design:** Fully responsive UI optimized for thumb-reachability, featuring pill-shaped buttons, touch-friendly inputs, and bottom-sheet modals.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend Framework:** React 18, Vite
+- **Backend & Database:** Supabase (PostgreSQL, Row Level Security)
+- **Mapping:** React-Leaflet, OpenStreetMap
+- **Styling:** Custom Vanilla CSS (Bitcoin DeFi Design System)
+- **Icons & UI Utilities:** Lucide React, React Hot Toast
+- **QR Processing:** `qrcode.react`, `html5-qrcode`
+- **Fonts:** Space Grotesk (Headings), Inter (Body), JetBrains Mono (Data/Code)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- A Supabase account
+
+### 1. Clone the Repository
 
 ```bash
-cd frontend
+git clone https://github.com/omkarpandharpurkar1600-debug/attendencetracker2431.git
+cd attendencetracker2431/frontend
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
-npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+### 3. Database Setup (Supabase)
 
-## Demo Credentials
+1. Create a new Supabase project.
+2. Navigate to the SQL Editor in your Supabase dashboard.
+3. Run the SQL scripts provided in the root directory (`secure_schema.sql` and `supabase_setup.sql`) to generate the required tables:
+   - `sessions`: Stores active class sessions.
+   - `attendance`: Stores student attendance records and continuous monitoring states.
+   - `location_logs`: Stores real-time GPS tracking data points.
+   - `audit_logs`: Tracks administrative actions.
 
-No passwords required! Just select from the dropdown:
+### 4. Environment Variables
 
-| Role | Name | Roll Number |
-|------|------|-------------|
-| Student | Swanand | CS2024001 |
-| Student | Priya Patel | CS2024002 |
-| Student | Amit Kumar | CS2024003 |
-| Student | Neha Singh | CS2024004 |
-| Admin | Admin Panel | — |
+Create a `.env` file in the `frontend` directory and add your Supabase credentials:
 
-## How to Demo
-
-### Step 1: Create a Session (Admin)
-1. Login as **Admin**
-2. Go to **Sessions** tab
-3. Fill in Session Name, Class Name, Start Time, End Time
-4. Click **Capture Location & Create** (allow GPS permission)
-5. Click **Show QR** on the created session
-
-### Step 2: Mark Attendance (Student)
-1. Open another browser/tab → Login as a **Student**
-2. Click **Scan QR Code**
-3. Point camera at the QR code displayed by admin
-4. Attendance is marked with GPS location check
-
-### Step 3: GPS Tracking
-- After scanning, the app tracks the student's location every 15 seconds
-- If the student moves beyond 100m from the session location → status changes to **Absent**
-- If they return within range → status changes back to **Present**
-
-### Step 4: View Records
-- **Students** can view their attendance history
-- **Admin** can see all attendance records with distance data
-
-## Geofence Configuration
-
-The default geofence radius is **100 meters**. To change it, edit `src/data/students.js`:
-
-```js
-export const GEOFENCE_RADIUS_METERS = 100; // change this value
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── data/
-│   │   └── students.js          # Demo students + config
-│   ├── utils/
-│   │   ├── storage.js           # localStorage helpers
-│   │   └── geo.js               # Geolocation utilities
-│   ├── context/
-│   │   └── AppContext.jsx       # App state management
-│   ├── pages/
-│   │   ├── Login.jsx            # Student/Admin selector
-│   │   ├── StudentDashboard.jsx # Student view
-│   │   └── AdminPanel.jsx       # Admin view
-│   ├── components/
-│   │   ├── QRScanner.jsx        # Camera QR scanner
-│   │   ├── QRGenerator.jsx      # QR code display
-│   │   ├── LocationTracker.jsx  # GPS tracking
-│   │   └── AttendanceHistory.jsx
-│   ├── App.jsx                  # Routes
-│   ├── main.jsx                 # Entry point
-│   └── index.css                # Design system
-├── index.html
-├── package.json
-└── vite.config.js
-```
-
-## Deployment (Vercel)
+### 5. Run the Development Server
 
 ```bash
-cd frontend
-npm run build
+npm run dev -- --host
 ```
+The application will be available at `http://localhost:5173`. You can also access it on your mobile device via your local network IP (e.g., `http://192.168.x.x:5173`).
 
-Deploy the `dist/` folder to Vercel:
-- Build Command: `npm run build`
-- Output Directory: `dist`
-- Framework: Vite
+---
 
-## Notes
+## 🔒 Security Architecture
 
-- This is a **demo project** — all data is stored in the browser's localStorage
-- Clearing browser data will reset all attendance records
-- GPS requires HTTPS in production (localhost works for development)
-- Camera access requires user permission
+1. **Session Lifecycle:** An admin creates a session, which establishes the "Origin Point" GPS coordinates.
+2. **Scan Phase:** A student scans the dynamic QR code displayed by the admin. The QR payload contains a timestamp. If the timestamp is older than 10 minutes, the scan is rejected (mitigating screenshot sharing).
+3. **Validation Phase:** The student's device requests GPS permissions. Their coordinates are compared against the Origin Point using the Haversine formula. 
+4. **Monitoring Phase:** If within the 200m radius, they are marked "Present" and enter "Monitoring" mode. Their location is periodically polled.
+5. **Risk Assessment:** If the student drifts significantly from the classroom, their risk level escalates (Low → Medium → High). Admins can view this live on the radar map.
 
-## License
+---
 
-MIT
+## 👥 Development Team
+
+GeoSecure was developed as a First Year Project at **KLS Gogte Institute Of Technology, Belagavi, Karnataka**.
+
+- Omkar (2XI25ME056)
+- Bhavana (2XI25CS045)
+- Yash (2XI25CV108)
+- Kartik (2XI25EC056)
+
+---
+
+## 📄 License
+
+This project is released under the [MIT License](LICENSE).
+
+© 2026 GeoSecure Attendance. All rights reserved.
