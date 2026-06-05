@@ -80,7 +80,7 @@ export default function Landing() {
             { icon: <CheckCircle />, title: '3. Attendance Marked', desc: 'Initial validation succeeds. Student is marked Present.' },
             { icon: <MapPin />, title: '4. GPS Location Captured', desc: 'The exact latitude/longitude of the scan is locked as the Origin point.' },
             { icon: <Clock />, title: '5. Monitoring Starts', desc: 'A 2-minute live tracking window begins in the background.' },
-            { icon: <Navigation />, title: '6. Student Leaves Radius', desc: 'The student attempts to leave the 20-meter geofenced classroom area.' },
+            { icon: <Navigation />, title: '6. Student Leaves Radius', desc: 'The student attempts to leave the designated geofenced classroom area.' },
             { icon: <ShieldAlert />, title: '7. Attendance Revoked', desc: 'System detects movement and instantly downgrades status to Absent.' }
           ].map((step, i) => (
             <div key={i} className="glass-card workflow-step" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '16px 24px', marginLeft: 16, transform: `translateX(${i % 2 === 0 ? 0 : 20}px)` }}>
