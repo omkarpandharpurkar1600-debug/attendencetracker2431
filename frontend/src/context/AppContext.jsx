@@ -145,6 +145,9 @@ export function AppProvider({ children }) {
     // Initial Teacher-to-Student scan logic
     const status = distance <= INITIAL_SCAN_RADIUS_METERS ? 'Present' : 'Absent';
 
+    // If Absent on initial scan, skip monitoring entirely — they are not in the classroom
+    const monitoringStatus = status === 'Absent' ? 'Completed' : 'Monitoring';
+
     const record = await storage.addAttendance({
       studentId: currentUser.studentId,
       studentName: currentUser.name,
@@ -158,14 +161,14 @@ export function AppProvider({ children }) {
       status,
       deviceId: storage.getDeviceId(),
       qrToken,
-      monitoringStatus: 'Monitoring',
-      monitoringEndTime: new Date(Date.now() + MONITORING_DURATION_MS).toISOString(),
-      originLat: studentLocation.lat,
-      originLng: studentLocation.lng,
+      monitoringStatus,
+      monitoringEndTime: status === 'Absent' ? null : new Date(Date.now() + MONITORING_DURATION_MS).toISOString(),
+      originLat: lat,   // Use SESSION (classroom) coordinates, not student's scan point
+      originLng: lng,
       currentDistance: distance,
       currentLat: studentLocation.lat,
       currentLng: studentLocation.lng,
-      riskLevel: distance <= GEOFENCE_RADIUS_METERS ? 'Low' : 'High',
+      riskLevel: status === 'Absent' ? 'High' : 'Low',
     });
 
     await storage.addLocationLog({
