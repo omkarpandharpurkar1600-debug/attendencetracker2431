@@ -198,6 +198,15 @@ export default function QRScanner({ onSuccess }) {
                 {result.record.status === 'Present' ? 'Within Range' : 'Out of Range'}
               </span>
             </div>
+            
+            {/* DEBUG INFO */}
+            <div style={{ marginTop: 16, padding: 12, background: 'rgba(255,0,0,0.1)', border: '1px solid var(--error)', borderRadius: 8, fontSize: '0.8rem', textAlign: 'left' }}>
+              <strong style={{ color: 'var(--error)' }}>DEBUG INFO:</strong><br/>
+              Phone Lat: {result.record.currentLat?.toFixed(6)}<br/>
+              Phone Lng: {result.record.currentLng?.toFixed(6)}<br/>
+              Calculated Distance: {result.record.currentDistance?.toFixed(2)} meters<br/>
+              (Check laptop coordinates in Admin Panel)
+            </div>
           </div>
           <button
             className="btn-primary w-full"
