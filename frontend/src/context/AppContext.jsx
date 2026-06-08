@@ -165,8 +165,10 @@ export function AppProvider({ children }) {
       qrToken,
       monitoringStatus,
       monitoringEndTime: status === 'Absent' ? null : new Date(Date.now() + MONITORING_DURATION_MS).toISOString(),
-      originLat: lat,   // Use SESSION (classroom) coordinates, not student's scan point
-      originLng: lng,
+      // Because laptop IP geolocation is inaccurate, we must anchor the 20m live geofence 
+      // to the student's high-precision phone coordinates at the exact moment they scanned.
+      originLat: studentLocation.lat,
+      originLng: studentLocation.lng,
       currentDistance: distance,
       currentLat: studentLocation.lat,
       currentLng: studentLocation.lng,
