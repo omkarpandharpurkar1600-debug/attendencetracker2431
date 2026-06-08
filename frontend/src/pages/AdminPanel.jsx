@@ -311,9 +311,6 @@ export default function AdminPanel() {
                         )}
                       </div>
                       <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{session.className}</p>
-                      <p style={{ color: 'var(--error)', fontSize: '0.75rem', fontFamily: 'monospace', margin: '4px 0' }}>
-                        Origin: {session.lat?.toFixed(6)}, {session.lng?.toFixed(6)}
-                      </p>
                       <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                         {formatDate(session.startTime)} · {formatTimeRange(session.startTime, session.endTime)}
                       </p>
