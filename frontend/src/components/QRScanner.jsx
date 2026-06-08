@@ -104,6 +104,7 @@ export default function QRScanner({ onSuccess }) {
     const attendanceResult = await markAttendance(decodedText, {
       lat: position.lat,
       lng: position.lng,
+      accuracy: position.accuracy,
     });
 
     if (attendanceResult.success) {
@@ -193,8 +194,8 @@ export default function QRScanner({ onSuccess }) {
             </div>
             <div className="detail-row">
               <span className="detail-label">Range</span>
-              <span className={`badge ${(result.record.currentDistance ?? 0) <= INITIAL_SCAN_RADIUS_METERS ? 'badge-success' : 'badge-error'}`}>
-                {(result.record.currentDistance ?? 0) <= INITIAL_SCAN_RADIUS_METERS ? 'Within Range' : 'Out of Range'}
+              <span className={`badge ${result.record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
+                {result.record.status === 'Present' ? 'Within Range' : 'Out of Range'}
               </span>
             </div>
           </div>

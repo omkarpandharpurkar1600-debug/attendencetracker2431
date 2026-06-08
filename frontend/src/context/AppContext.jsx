@@ -143,7 +143,9 @@ export function AppProvider({ children }) {
     );
 
     // Initial Teacher-to-Student scan logic
-    const status = distance <= INITIAL_SCAN_RADIUS_METERS ? 'Present' : 'Absent';
+    // Add student's GPS inaccuracy radius to the limit, plus an extra 500m buffer for poor laptop IP geolocation
+    const allowedRadius = INITIAL_SCAN_RADIUS_METERS + (studentLocation.accuracy || 0) + 500;
+    const status = distance <= allowedRadius ? 'Present' : 'Absent';
 
     // If Absent on initial scan, skip monitoring entirely — they are not in the classroom
     const monitoringStatus = status === 'Absent' ? 'Completed' : 'Monitoring';
