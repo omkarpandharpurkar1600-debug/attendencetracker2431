@@ -112,7 +112,7 @@ export function AppProvider({ children }) {
 
     const { sessionId, qrToken, lat, lng, timestamp } = parsed;
 
-    if (timestamp && Date.now() - timestamp > 600000) {
+    if (timestamp && Date.now() - timestamp > 120000) {
       return { success: false, message: 'QR Code has expired. Please scan the new one.' };
     }
 

@@ -40,6 +40,70 @@ export default function AdminPanel() {
     return now >= start && now <= end;
   });
 
+  // ── Auto-Absent: Mark students absent 15 min after session start ──
+  const [finalizedSessions, setFinalizedSessions] = useState(new Set());
+
+  useEffect(() => {
+    const AUTO_ABSENT_DELAY_MS = 15 * 60 * 1000; // 15 minutes
+
+    const checkAutoAbsent = async () => {
+      for (const session of sessions) {
+        const sessionStart = new Date(session.startTime);
+        const cutoff = new Date(sessionStart.getTime() + AUTO_ABSENT_DELAY_MS);
+
+        // Only trigger if we've passed the 15-min mark and haven't finalized this session yet
+        if (now >= cutoff && !finalizedSessions.has(session.id)) {
+          try {
+            // Get all students and existing attendance for this session
+            const allStudents = studentsList.length > 0 ? studentsList : await storage.getStudentsList();
+            const sessionAttendance = attendance.filter(a => a.sessionId === session.id);
+            const markedStudentIds = new Set(sessionAttendance.map(a => a.studentId));
+
+            // Find students who haven't marked attendance
+            const absentStudents = allStudents.filter(s => !markedStudentIds.has(s.studentId));
+
+            if (absentStudents.length > 0) {
+              for (const student of absentStudents) {
+                await storage.addAttendance({
+                  studentId: student.studentId,
+                  studentName: student.name,
+                  rollNumber: student.rollNumber,
+                  sessionId: session.id,
+                  sessionName: session.name,
+                  scanTime: new Date().toISOString(),
+                  lat: null,
+                  lng: null,
+                  distance: null,
+                  status: 'Absent',
+                  deviceId: null,
+                  qrToken: null,
+                  monitoringStatus: 'Completed',
+                  monitoringEndTime: null,
+                  originLat: null,
+                  originLng: null,
+                  currentDistance: null,
+                  currentLat: null,
+                  currentLng: null,
+                  riskLevel: 'High',
+                });
+              }
+              toast.success(`Auto-marked ${absentStudents.length} absent student(s) for "${session.name}"`);
+              await refreshData();
+            }
+
+            setFinalizedSessions(prev => new Set([...prev, session.id]));
+          } catch (err) {
+            console.error('Auto-absent error for session', session.id, err);
+          }
+        }
+      }
+    };
+
+    if (sessions.length > 0) {
+      checkAutoAbsent();
+    }
+  }, [now, sessions, attendance, studentsList, finalizedSessions, refreshData]);
+
   const todayAttendance = attendance.filter((a) => {
     const scanDate = new Date(a.scanTime);
     return (
