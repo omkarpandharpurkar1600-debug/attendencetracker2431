@@ -149,7 +149,7 @@ export default function Landing() {
           Developed By
         </h3>
         <div className="team-grid" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px 48px', marginBottom: 32 }}>
-          {['Omkar (2XI25ME056)', 'Bhavana (2XI25CS045)', 'Yash (2XI25CV108)', 'Kartik (2XI25EC056)'].map((member, i) => (
+          {['Omkar (2GI25ME056)', 'Bhavana (2GI25CS045)', 'Yash (2GI25CV108)', 'Kartik (2GI25EC056)'].map((member, i) => (
             <div key={i} style={{ fontWeight: 600, fontSize: '1.1rem' }}>{member}</div>
           ))}
         </div>
