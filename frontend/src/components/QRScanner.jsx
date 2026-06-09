@@ -197,6 +197,7 @@ export default function QRScanner({ onSuccess }) {
               <span className={`badge ${result.record.status === 'Present' ? 'badge-success' : 'badge-error'}`}>
                 {result.record.status === 'Present' ? 'Within Range' : 'Out of Range'}
               </span>
+            </div>
           </div>
           <button
             className="btn-primary w-full"
